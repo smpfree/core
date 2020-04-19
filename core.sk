@@ -50,7 +50,20 @@ command /delete [<text>] [<text>]:
     if {server::%arg-1%} is set:
      if {server::%arg-1%::owner} is uuid of player:
       send "&eDeleting server..."
+      loop all players:
+       if world of loop-player is "s-%arg-1%-world", "s-%arg-1%-nether" or "s-%arg-1%-end":
+        execute loop-player command "hub"
+      wait 1 tick
       delete {server::%arg-1%::*}
+      loop {inv::*}:
+       set {_count} to 0
+       loop 36 times:
+        delete {inv::%loop-index%::%{_count}%::main::%arg-1%}
+        add 1 to {_count}
+       delete {inv::%loop-index%::helmet::main::%arg-1%}
+       delete {inv::%loop-index%::chest::main::%arg-1%}
+       delete {inv::%loop-index%::legs::main::%arg-1%}
+       delete {inv::%loop-index%::feet::main::%arg-1%}
       execute console command "mv delete s-%arg-1%-world"
       execute console command "mvconfirm"
       execute console command "mv delete s-%arg-1%-nether"
@@ -79,12 +92,41 @@ command /join [<text>] [<text>]:
    else:
     if {server::%arg-1%} is set:
      if {server::%arg-1%::users::%uuid of player%} is set:
+      set {_worldname} to "%world of player%"
+      set {_worldcheck} to the first 2 characters of {_worldname}
+      if {_worldcheck} is "s-":
+       set {_world} to last length of "%world of player%" - 2 characters of "%world of player%"
+       if last 6 characters of "%{_world}%" is "-world":
+        set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
+       if last 7 characters of "%{_world}%" is "-nether":
+        set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
+       if last 4 characters of "%{_world}%" is "-end":
+        set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
+       set {_world} to "server-%{_world}%"
+      else:
+       set {_world} to "hub"
+      saveinv("%{_world}%", player)
       if {server::%arg-1%::loaded} is not true:
        execute console command "mv load s-%arg-1%-world"
        execute console command "mv load s-%arg-1%-nether"
        execute console command "mv load s-%arg-1%-end"
-      execute console command "mv tp %player% s-%arg-1%-world" # change "-world" to "-%server::%arg-1%-worlduserleftoff-%uuid of player%"
+      if {server::%arg-1%::firstjoin::%uuid of player%} is not set:
+       set {server::%arg-1%::world::%uuid of player%} to "s-%arg-1%-world"
       execute console command "mvconfirm"
+      if {server::%arg-1%::firstjoin::%uuid of player%} is not set:
+       execute console command "mv tp %player% %{server::%arg-1%::world::%uuid of player%}%"
+       wait 1 tick
+       set {server::%arg-1%::location::x::%uuid of player%} to x-coordinate of player
+       set {server::%arg-1%::location::y::%uuid of player%} to y-coordinate of player
+       set {server::%arg-1%::location::z::%uuid of player%} to z-coordinate of player
+       set {server::%arg-1%::spawnpoint::x::%uuid of player%} to x-coordinate of player
+       set {server::%arg-1%::spawnpoint::y::%uuid of player%} to y-coordinate of player
+       set {server::%arg-1%::spawnpoint::z::%uuid of player%} to z-coordinate of player
+       set {server::%arg-1%::firstjoin::%uuid of player%} to true
+      else:
+       execute console command "mv tp %player% e:%{server::%arg-1%::world::%uuid of player%}%:%round({server::%arg-1%::location::x::%uuid of player%})%,%round({server::%arg-1%::location::y::%uuid of player%})%,%round({server::%arg-1%::location::z::%uuid of player%})%"
+       wait 1 tick
+      giveinv("server-%arg-1%", player)
       send "&eYou have joined the server."
       stop
      else:
@@ -93,6 +135,34 @@ command /join [<text>] [<text>]:
     else:
      send "&cA server with this name does not exists."
      stop
+
+command /hub [<text>]:
+ trigger:
+  set {_worldname} to "%world of player%"
+  set {_worldcheck} to the first 2 characters of {_worldname}
+  if {_worldcheck} is "s-":
+   set {server::%arg-1%::world::%uuid of player%} to "%{_worldname}%"
+   set {_world} to last length of "%world of player%" - 2 characters of "%world of player%"
+   if last 6 characters of "%{_world}%" is "-world":
+    set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
+   if last 7 characters of "%{_world}%" is "-nether":
+    set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
+   if last 4 characters of "%{_world}%" is "-end":
+    set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
+   set {server::%{_world}%::location::x::%uuid of player%} to x-coordinate of player
+   set {server::%{_world}%::location::y::%uuid of player%} to y-coordinate of player
+   set {server::%{_world}%::location::z::%uuid of player%} to z-coordinate of player
+   set {_world} to "server-%{_world}%"
+   wait 1 tick
+  else:
+   set {_world} to "hub"
+  saveinv("%{_world}%", player)
+  execute console command "mv tp %player% world"
+  execute console command "mvconfirm"
+  wait 1 tick
+  giveinv("hub", player)
+  send "&eYou have been sent to the hub."
+  stop
 
 every 5 seconds:
  delete {_worlds::*}
@@ -115,3 +185,91 @@ every 5 seconds:
     execute console command "mv unload s-%loop-index%-nether"
     execute console command "mv unload s-%loop-index%-end"
     set {server::%loop-index%::loaded} to false
+
+on disconnect:
+ set {_worldname} to "%world of player%"
+ set {_worldcheck} to the first 2 characters of {_worldname}
+ if {_worldcheck} is "s-":
+  set {_world} to last length of "%world of player%" - 2 characters of "%world of player%"
+  if last 6 characters of "%{_world}%" is "-world":
+   set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
+  if last 7 characters of "%{_world}%" is "-nether":
+   set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
+  if last 4 characters of "%{_world}%" is "-end":
+   set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
+  set {server::%{_world}%::world::%uuid of player%} to "%world of player%"
+  set {_world} to "server-%{_world}%"
+  set {server::%{_world}%::location::x::%uuid of player%} to x-coordinate of player
+  set {server::%{_world}%::location::y::%uuid of player%} to y-coordinate of player
+  set {server::%{_world}%::location::z::%uuid of player%} to z-coordinate of player
+ else:
+  set {_world} to "hub"
+ saveinv("%{_world}%", player)
+
+on join:
+ clear inventory of player
+ make player execute "hub"
+ stop
+
+on death:
+ force player to respawn
+ set {_worldname} to "%world of player%"
+ set {_worldcheck} to the first 2 characters of {_worldname}
+ if {_worldcheck} is "s-":
+  set {_world} to last length of "%world of player%" - 2 characters of "%world of player%"
+  if last 7 characters of "%{_world}%" is "-nether":
+   set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
+   set {_world} to "s-%{_world}%-world"
+  if last 4 characters of "%{_world}%" is "-end":
+   set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
+   set {_world} to "s-%{_world}%-world"
+  execute console command "mv tp %player% %{_world}%"
+  execute console command "mvconfirm"
+  wait 1 tick
+  execute console command "tp %player% {server::%{_world}%::spawnpoint::x::%uuid of player%} {server::%{_world}%::spawnpoint::y::%uuid of player%} {server::%{_world}%::spawnpoint::z::%uuid of player%}"
+
+on rightclick:
+ set {_eventblock} to "%event-block%"
+ if last 5 characters of {_eventblock} is " head":
+  set {_eventblock} to first length of {_eventblock} - 5 characters of "%{_eventblock}%"
+ last 4 characters of {_eventblock} is " bed"
+ set {_worldname} to "%world of player%"
+ set {_worldcheck} to the first 2 characters of {_worldname}
+ if {_worldcheck} is "s-":
+  set {_world} to last length of "%world of player%" - 2 characters of "%world of player%"
+  if last 6 characters of "%{_world}%" is "-world":
+   set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
+  if last 7 characters of "%{_world}%" is "-nether":
+   set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
+  if last 4 characters of "%{_world}%" is "-end":
+   set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
+  set {server::%{_world}%::spawnpoint::x::%uuid of player%} to x-coordinate of player
+  set {server::%{_world}%::spawnpoint::y::%uuid of player%} to y-coordinate of player
+  set {server::%{_world}%::spawnpoint::z::%uuid of player%} to z-coordinate of player
+  if time in world is not night:
+   send "Respawn point set"
+   cancel event
+
+# PerWorldInventory Functions (https://www.spigotmc.org/resources/perworldinventory-api-no-more-bugs-of-inventories-for-skript-deployers-implement-in-yours-skripts.30492/)
+
+function saveinv(w: text , p: player):
+ set {_count} to 0
+ loop 36 times:
+  set {inv::%{_p}%::%{_count}%::main::%{_w}%} to slot {_count} of {_p}'s inventory
+  add 1 to {_count}
+ set {inv::%{_p}%::helmet::main::%{_w}%} to {_p}'s helmet
+ set {inv::%{_p}%::chest::main::%{_w}%} to {_p}'s chestplate
+ set {inv::%{_p}%::legs::main::%{_w}%} to {_p}'s leggings
+ set {inv::%{_p}%::feet::main::%{_w}%} to {_p}'s boots
+
+function giveinv(w: text , p: player):
+ execute console command "clear %{_p}%"
+ wait 1 tick
+ set {_count} to 0
+ loop 36 times:
+  set slot {_count} of {_p}'s inventory to {inv::%{_p}%::%{_count}%::main::%{_w}%}
+  add 1 to {_count}
+ set the helmet of {_p} to {inv::%{_p}%::helmet::main::%{_w}%}
+ set the chestplate of {_p} to {inv::%{_p}%::chest::main::%{_w}%}
+ set the leggings of {_p} to {inv::%{_p}%::legs::main::%{_w}%}
+ set the boots of {_p} to {inv::%{_p}%::feet::main::%{_w}%}
