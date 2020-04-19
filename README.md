@@ -9,4 +9,4 @@ Requires these plugins:
 - [Skript 2.4](https://github.com/SkriptLang/Skript/releases/download/2.4/Skript.jar)
 
 Extra Plugins:
--Latest [ViaVersion](https://www.spigotmc.org/resources/viaversion.19254/)
+- Latest [ViaVersion](https://www.spigotmc.org/resources/viaversion.19254/)
