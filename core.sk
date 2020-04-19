@@ -246,7 +246,45 @@ on rightclick:
     send "Respawn point set"
     cancel event
 
-# Modified PerWorldInventory Functions (https://www.spigotmc.org/resources/perworldinventory-api-no-more-bugs-of-inventories-for-skript-deployers-implement-in-yours-skripts.30492/)
+on rightclick on ender chest:
+ set {_worldname} to "%world of player%"
+ set {_worldcheck} to the first 2 characters of {_worldname}
+ if {_worldcheck} is "s-":
+  set {_world} to last length of "%world of player%" - 2 characters of "%world of player%"
+  if last 6 characters of "%{_world}%" is "-world":
+   set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
+  if last 7 characters of "%{_world}%" is "-nether":
+   set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
+  if last 4 characters of "%{_world}%" is "-end":
+   set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
+  cancel event
+  open chest with 3 rows named "Ender Chest" to player
+  wait 1 ticks
+  loop {server::%{_world}%::enderchest::%player%::*}:
+   add loop-value to current inventory of player
+  set {enderchest::%player%} to true
+  
+on inventory close:
+ if {enderchest::%player%} is set:
+  set {_worldname} to "%world of player%"
+  set {_worldcheck} to the first 2 characters of {_worldname}
+  if {_worldcheck} is "s-":
+   set {_world} to last length of "%world of player%" - 2 characters of "%world of player%"
+   if last 6 characters of "%{_world}%" is "-world":
+    set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
+   if last 7 characters of "%{_world}%" is "-nether":
+    set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
+   if last 4 characters of "%{_world}%" is "-end":
+    set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
+   delete {server::%{_world}%::enderchest::%player%::*}
+   loop 27 times:
+    set {server::%{_world}%::enderchest::%player%::%loop-number - 1%} to slot "%loop-number - 1%" parsed as an integer of current inventory of player
+   delete {enderchest::%player%}
+
+on load:
+ delete {enderchest::*}
+
+# PerWorldInventory Functions (https://www.spigotmc.org/resources/perworldinventory-api-no-more-bugs-of-inventories-for-skript-deployers-implement-in-yours-skripts.30492/)
 
 function saveinv(w: text , p: player):
  set {_count} to 0
