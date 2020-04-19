@@ -1,0 +1,117 @@
+command /create [<text>] [<text>]:
+ trigger:
+  if arg-1 is not set:
+   send "&cIncorrect usage. Please use ""/create <server name>"" instead."
+   stop
+  else:
+   if arg-2 is set:
+    send "&cIncorrect usage. The server name should only contain one argument."
+    stop
+   else:
+    if {server::%arg-1%} is set:
+     send "&cA server with this name already exists."
+     stop
+    else:
+     set {_servers} to 0
+     loop {server::*}:
+      if {server::%loop-index%::owner} is uuid of player:
+       add 1 to {_servers}
+     if {servers} is greater than 1:
+      send "&cYou have reached the maximum amount of servers you can make. (1)"
+      stop
+     else:
+      send "&eYour private SMP server is being created..."
+      set {server::%arg-1%} to "free"
+      set {server::%arg-1%::owner} to uuid of player
+      set {server::%arg-1%::users::%uuid of player%} to "op"
+      execute console command "mv create s-%arg-1%-world normal"
+      execute console command "mv create s-%arg-1%-nether nether"
+      execute console command "mv create s-%arg-1%-end end"
+      execute console command "mvnp link nether s-%arg-1%-world s-%arg-1%-nether"
+      execute console command "mvnp link nether s-%arg-1%-nether s-%arg-1%-world"
+      execute console command "mvnp link end s-%arg-1%-world s-%arg-1%-end"
+      execute console command "mvnp link end s-%arg-1%-end s-%arg-1%-world"
+      execute console command "mvnp link end s-%arg-1%-nether s-%arg-1%-end"
+      execute console command "mvnp link nether s-%arg-1%-end s-%arg-1%-nether"
+      send "&eYour server has been created."
+      set {server::%arg-1%::loaded} to true
+      stop
+
+command /delete [<text>] [<text>]:
+ trigger:
+  if arg-1 is not set:
+   send "&cIncorrect usage. Please use ""/delete <server name>"" instead."
+   stop
+  else:
+   if arg-2 is set:
+    send "&cIncorrect usage. The server name should only contain one argument."
+    stop
+   else:
+    if {server::%arg-1%} is set:
+     if {server::%arg-1%::owner} is uuid of player:
+      send "&eDeleting server..."
+      delete {server::%arg-1%::*}
+      execute console command "mv delete s-%arg-1%-world"
+      execute console command "mvconfirm"
+      execute console command "mv delete s-%arg-1%-nether"
+      execute console command "mvconfirm"
+      execute console command "mv delete s-%arg-1%-end"
+      execute console command "mvconfirm"
+      delete {server::%arg-1%}
+      send "&eYour server has been deleted."
+      stop
+     else:
+      send "&cYou do not own this server."
+      stop
+    else:
+     send "&cA server with this name does not exists."
+     stop
+
+command /join [<text>] [<text>]:
+ trigger:
+  if arg-1 is not set:
+   send "&cIncorrect usage. Please use ""/join <server name>"" instead."
+   stop
+  else:
+   if arg-2 is set:
+    send "&cIncorrect usage. The server name should only contain one argument."
+    stop
+   else:
+    if {server::%arg-1%} is set:
+     if {server::%arg-1%::users::%uuid of player%} is set:
+      if {server::%arg-1%::loaded} is not true:
+       execute console command "mv load s-%arg-1%-world"
+       execute console command "mv load s-%arg-1%-nether"
+       execute console command "mv load s-%arg-1%-end"
+      execute console command "mv tp %player% s-%arg-1%-world" # change "-world" to "-%server::%arg-1%-worlduserleftoff-%uuid of player%"
+      execute console command "mvconfirm"
+      send "&eYou have joined the server."
+      stop
+     else:
+      send "&cYou have no permission to join this server."
+      stop
+    else:
+     send "&cA server with this name does not exists."
+     stop
+
+every 5 seconds:
+ delete {_worlds::*}
+ loop all players:
+  set {_worldname} to "%world of loop-player%"
+  set {_worldcheck} to the first 2 characters of {_worldname}
+  if {_worldcheck} is "s-":
+   set {_world} to last length of "%world of loop-player%" - 2 characters of "%world of loop-player%"
+   if last 6 characters of "%{_world}%" is "-world":
+    set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
+   if last 7 characters of "%{_world}%" is "-nether":
+    set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
+   if last 4 characters of "%{_world}%" is "-end":
+    set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
+   set {_worlds::%{_world}%} to true
+ loop {server::*}:
+  if {_worlds::%loop-index%} is not true:
+   if {server::%loop-index%::loaded} is true:
+    execute console command "mv unload s-%loop-index%-world"
+    execute console command "mv unload s-%loop-index%-nether"
+    execute console command "mv unload s-%loop-index%-end"
+    set {server::%loop-index%::loaded} to false
