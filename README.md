@@ -7,6 +7,7 @@ Requires these plugins:
 - [Multiverse 4.1.0](https://dev.bukkit.org/projects/multiverse-core/files/2768599/download)
 - [Multiverse-NetherPortals 4.1.0](https://dev.bukkit.org/projects/multiverse-netherportals/files/2768602/download)
 - [Skript 2.4](https://github.com/SkriptLang/Skript/releases/download/2.4/Skript.jar)
+- [SkQuery 4.1.2](https://www.spigotmc.org/resources/skquery-1-9-1-15.36631/)
 
 Extra Plugins:
 - Latest [ViaVersion](https://www.spigotmc.org/resources/viaversion.19254/)
