@@ -1,6 +1,9 @@
 # FreeSMP
 This is the source code to the Skript that manages almost everything.
+
 Tested on PaperSpigot 1.13.
+
+Development started in 4/18/2020 (m/d/y).
 
 # Plugins
 Requires these plugins:
