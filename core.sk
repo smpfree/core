@@ -64,6 +64,7 @@ command /delete [<text>] [<text>]:
        delete {inv::%loop-index%::chest::main::%arg-1%}
        delete {inv::%loop-index%::legs::main::%arg-1%}
        delete {inv::%loop-index%::feet::main::%arg-1%}
+       delete {inv::%loop-index%::shield::main::%arg-1%}
       execute console command "mv delete s-%arg-1%-world"
       execute console command "mvconfirm"
       execute console command "mv delete s-%arg-1%-nether"
@@ -126,6 +127,7 @@ command /join [<text>] [<text>]:
       else:
        execute console command "mv tp %player% e:%{server::%arg-1%::world::%uuid of player%}%:%round({server::%arg-1%::location::x::%uuid of player%})%,%round({server::%arg-1%::location::y::%uuid of player%})%,%round({server::%arg-1%::location::z::%uuid of player%})%"
        wait 1 tick
+      wait 1 tick
       giveinv("server-%arg-1%", player)
       send "&eYou have joined the server."
       stop
@@ -284,7 +286,13 @@ on inventory close:
 on load:
  delete {enderchest::*}
 
-# PerWorldInventory Functions (https://www.spigotmc.org/resources/perworldinventory-api-no-more-bugs-of-inventories-for-skript-deployers-implement-in-yours-skripts.30492/)
+command /test:
+ trigger:
+  send "%health of player%"
+
+
+
+# Modified PerWorldInventory Functions (https://www.spigotmc.org/resources/perworldinventory-api-no-more-bugs-of-inventories-for-skript-deployers-implement-in-yours-skripts.30492/)
 
 function saveinv(w: text , p: player):
  set {_count} to 0
