@@ -27,6 +27,8 @@ every 1 seconds:
     set {_loopworld} to "hub"
    if {_loopworld} is not {_world}:
     hide loop-player-2 from loop-player-1
+   else:
+    reveal loop-player-2 from loop-player-1
 
 on chat:
  cancel event
