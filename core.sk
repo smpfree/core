@@ -1,3 +1,39 @@
+on command:
+ if executor is player:
+  if player is not op:
+   if command is "help", "hub", "list", "create", "delete" or "join":
+   else:
+    cancel event
+    send "&fUnknown command. Type ""/help"" for help."
+
+command /help [<text>]:
+ trigger:
+  send "&a----- Help -----"
+  send "&b/help &f- &eShows the help menu."
+  send "&b/hub &f- &eGo to the hub."
+  send "&b/list &f- &eShows the list of SMP servers you have access to."
+  send "&b/create &f- &eCreate a SMP server."
+  send "&b/delete &f- &eDelete a SMP server."
+  send "&b/join &f- &eJoin a SMP server."
+  send "&a----------------"
+
+command /list [<text>]:
+ trigger:
+  send "&a----- Your SMP Servers ------"
+  loop {server::*}:
+   set {_own} to true
+   if {server::%loop-index%::users::%uuid of player%} is set:
+    if {server::%loop-index%::owner} is uuid of player:
+     send "&b%loop-index% &f- &eOwner"
+    else:
+     if {server::%loop-index%::users::%uuid of player%} is "op":
+      send "&b%loop-index% &f- &eOP"
+     else:
+      send "&b%loop-index% &f- &eMember"
+  if {_own} is not true:
+   send "&cYou do not own any SMP server!"
+  send "&a----------------------------"
+
 every 1 seconds:
  loop all players:
   set {_worldname} to "%world of loop-player%"
