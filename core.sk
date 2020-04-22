@@ -28,8 +28,9 @@ on command:
   wait 1 second
   delete {cooldown::%player%}
  else:
-  cancel event
-  send "&cWait %{cooldown::%player%}% seconds before running another command."
+  if command is not "hub":
+   cancel event
+   send "&cWait %{cooldown::%player%}% seconds before running another command."
 
 on join:
  if {stopping} is set:
