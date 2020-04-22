@@ -332,6 +332,7 @@ command /join [<text>] [<text>]:
       else:
        giveinv("server-%arg-1%", player)
       send "&eYou have joined the server."
+      execute console command "effect clear %player%" # temp
       loop all players:
        if world of loop-player is "s-%arg-1%-world", "s-%arg-1%-nether" or "s-%arg-1%-end":
         send "&e%player%&e has joined the game" to loop-player
@@ -382,6 +383,7 @@ command /hub [<text>]:
   heal the player
   feed the player
   set xp of player to 0
+  execute console command "effect clear %player%"
   send "&eYou have been sent to the hub."
   stop
 
