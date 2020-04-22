@@ -79,22 +79,20 @@ command /kick [<text>] [<offline player>] [<text>]:
         delete {server::%arg-1%::users::%arg-2%}
         send "&eSuccessfully kicked this player from the SMP server."
         if arg-2 is online:
-         loop all players:
-          if loop-player is arg-2:
-          set {_worldname} to "%world of loop-player%"
-          set {_worldcheck} to the first 2 characters of {_worldname}
-          if {_worldcheck} is "s-":
-           set {_world} to last length of "%world of loop-player%" - 2 characters of "%world of loop-player%"
-           if last 6 characters of "%{_world}%" is "-world":
-            set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
-           if last 7 characters of "%{_world}%" is "-nether":
-            set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
-           if last 4 characters of "%{_world}%" is "-end":
-            set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
-           if {_world} is arg-1:
-            make loop-player execute "hub"
-            send "&cYou have been kicked from the SMP server you were just on."
-            stop
+         set {_worldname} to "%world of loop-player%"
+         set {_worldcheck} to the first 2 characters of {_worldname}
+         if {_worldcheck} is "s-":
+          set {_world} to last length of "%world of loop-player%" - 2 characters of "%world of loop-player%"
+          if last 6 characters of "%{_world}%" is "-world":
+           set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
+          if last 7 characters of "%{_world}%" is "-nether":
+           set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
+          if last 4 characters of "%{_world}%" is "-end":
+           set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
+          if {_world} is arg-1:
+           make loop-player execute "hub"
+           send "&cYou have been kicked from the SMP server you were just on."
+           stop
        else:
         send "&cThis player already does not have access to the SMP server."
       else:
