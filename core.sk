@@ -151,14 +151,17 @@ on chat:
   loop all players:
    if world of loop-player is "s-%{_world}%-world", "s-%{_world}%-nether" or "s-%{_world}%-end":
     if {color::%player%} is set:
-     send "%player%&f: %message%" to loop-player
+     send "%{color::%player%}%%player%&f: %message%" to loop-player
     else:
      send "%player%&f: %message%" to loop-player
  else:
   send "[Hub] %player%&f: %message%" to console
   loop all players:
    if world of loop-player is world of player:
-    send "%player%&f: %message%" to loop-player
+    if {color::%player%} is set:
+     send "%{color::%player%}%%player%&f: %message%" to loop-player
+    else:
+     send "%player%&f: %message%" to loop-players
 
 command /setmaxservers [<offline player>] [<text>] [<text>]:
  trigger:
