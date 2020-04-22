@@ -203,7 +203,7 @@ command /create [<text>] [<text>]:
      loop {server::*}:
       if {server::%loop-index%::owner} is player:
        add 1 to {_servers}
-     if {servers} is greater than {maxservers::%player%}:
+     if {_servers} is greater than {maxservers::%player%}:
       send "&cYou have reached the maximum amount of servers you can make. (%{maxservers::%player%}%)"
       stop
      else:
@@ -265,7 +265,7 @@ command /delete [<text>] [<text>]:
 command /join [<text>] [<text>]:
  trigger:
   if world of player is not "world":
-   send "&cYou can only run this command in the hub."
+   send "&cYou can only run this command at the hub."
    stop
   if arg-1 is not set:
    send "&cIncorrect usage. Please use ""/join <server name>"" instead."
@@ -357,6 +357,9 @@ command /hub [<text>]:
     set {server::%{_world}%::location::y::%player%} to y-coordinate of player
     set {server::%{_world}%::location::z::%player%} to z-coordinate of player
     set {_world} to "server-%{_world}%"
+    loop all players:
+     if world of loop-player is "s-%{_world}%-world", "s-%{_world}%-nether" or "s-%{_world}%-end":
+      send "&e%player%&e has joined the game" to loop-player
     wait 1 tick
    else:
     set {_world} to "hub"
