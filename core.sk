@@ -6,6 +6,10 @@ on command:
     cancel event
     send "&fUnknown command. Type ""/help"" for help."
 
+on rightclick on sign:
+ if world of player is not "world":
+  cancel event
+
 command /help [<text>]:
  trigger:
   send "&a----- Help -----"
