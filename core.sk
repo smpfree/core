@@ -5,6 +5,21 @@ on command:
    else:
     cancel event
     send "&fUnknown command. Type ""/help"" for help."
+ else:
+  if command is "stop":
+   cancel event
+   set {stopping} to true
+   loop all players:
+    kick the loop-player due to "Server is stopping..."
+   wait 10 seconds
+   execute console command "stop"
+
+on join:
+ if {stopping} is set:
+  kick the loop-player due to "Server is stopping..."
+
+on load:
+ delete {stopping}
 
 on rightclick on sign:
  if world of player is not "world":
