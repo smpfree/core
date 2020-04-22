@@ -15,22 +15,23 @@ on command:
    execute console command "stop"
 
 on command:
- if {cooldown::%player%} is not set:
-  set {cooldown::%player%} to 5
-  wait 1 second
-  set {cooldown::%player%} to 4
-  wait 1 second
-  set {cooldown::%player%} to 3
-  wait 1 second
-  set {cooldown::%player%} to 2
-  wait 1 second
-  set {cooldown::%player%} to 1
-  wait 1 second
-  delete {cooldown::%player%}
- else:
-  if command is not "hub":
-   cancel event
-   send "&cWait %{cooldown::%player%}% seconds before running another command."
+ if executor is player:
+  if {cooldown::%player%} is not set:
+   set {cooldown::%player%} to 5
+   wait 1 second
+   set {cooldown::%player%} to 4
+   wait 1 second
+   set {cooldown::%player%} to 3
+   wait 1 second
+   set {cooldown::%player%} to 2
+   wait 1 second
+   set {cooldown::%player%} to 1
+   wait 1 second
+   delete {cooldown::%player%}
+  else:
+   if command is not "hub":
+    cancel event
+    send "&cWait %{cooldown::%player%}% seconds before running another command."
 
 on join:
  if {stopping} is set:
