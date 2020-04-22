@@ -26,11 +26,11 @@ command /list [<text>]:
   send "&a----- Your SMP Servers ------"
   loop {server::*}:
    set {_own} to true
-   if {server::%loop-index%::users::%uuid of player%} is set:
-    if {server::%loop-index%::owner} is uuid of player:
+   if {server::%loop-index%::users::%player%} is set:
+    if {server::%loop-index%::owner} is player:
      send "&b%loop-index% &f- &eOwner"
     else:
-     if {server::%loop-index%::users::%uuid of player%} is "op":
+     if {server::%loop-index%::users::%player%} is "op":
       send "&b%loop-index% &f- &eOP"
      else:
       send "&b%loop-index% &f- &eMember"
@@ -51,11 +51,11 @@ command /invite [<text>] [<offline player>] [<text>]:
       send "&cYou cannot invite yourself to a SMP server."
      else:
       if {server::%arg-1%} is set:
-       if {server::%arg-1%::owner} is uuid of player:
-        if {server::%arg-1%::users::%uuid of arg-2%} is set:
+       if {server::%arg-1%::owner} is player:
+        if {server::%arg-1%::users::%arg-2%} is set:
          send "&cThis player already has access to the SMP server."
         else:
-         set {server::%arg-1%::users::%uuid of arg-2%} to "member"
+         set {server::%arg-1%::users::%arg-2%} to "member"
          send "&eSuccessfully given this player access to the SMP server."
        else:
         send "&cOnly the SMP server owner can invite people to the server."
@@ -74,9 +74,9 @@ command /kick [<text>] [<offline player>] [<text>]:
      send "&cYou cannot kick yourself from a SMP server."
     else:
      if {server::%arg-1%} is set:
-      if {server::%arg-1%::owner} is uuid of player:
-       if {server::%arg-1%::users::%uuid of arg-2%} is set:
-        delete {server::%arg-1%::users::%uuid of arg-2%}
+      if {server::%arg-1%::owner} is player:
+       if {server::%arg-1%::users::%arg-2%} is set:
+        delete {server::%arg-1%::users::%arg-2%}
         send "&eSuccessfully kicked this player from the SMP server."
         if arg-2 is online:
          loop all players:
@@ -175,7 +175,7 @@ command /create [<text>] [<text>]:
     else:
      set {_servers} to 0
      loop {server::*}:
-      if {server::%loop-index%::owner} is uuid of player:
+      if {server::%loop-index%::owner} is player:
        add 1 to {_servers}
      if {servers} is greater than 1:
       send "&cYou have reached the maximum amount of servers you can make. (1)"
@@ -183,8 +183,8 @@ command /create [<text>] [<text>]:
      else:
       send "&eYour private SMP server is being created..."
       set {server::%arg-1%} to "free"
-      set {server::%arg-1%::owner} to uuid of player
-      set {server::%arg-1%::users::%uuid of player%} to "op"
+      set {server::%arg-1%::owner} to player
+      set {server::%arg-1%::users::%player%} to "op"
       execute console command "mv create s-%arg-1%-world normal"
       execute console command "mv create s-%arg-1%-nether nether"
       execute console command "mv create s-%arg-1%-end end"
@@ -209,7 +209,7 @@ command /delete [<text>] [<text>]:
     stop
    else:
     if {server::%arg-1%} is set:
-     if {server::%arg-1%::owner} is uuid of player:
+     if {server::%arg-1%::owner} is player:
       send "&eDeleting server..."
       loop all players:
        if world of loop-player is "s-%arg-1%-world", "s-%arg-1%-nether" or "s-%arg-1%-end":
@@ -250,7 +250,7 @@ command /join [<text>] [<text>]:
      make player execute "hub"
      stop
     if {server::%arg-1%} is set:
-     if {server::%arg-1%::users::%uuid of player%} is set:
+     if {server::%arg-1%::users::%player%} is set:
       loop all players:
        if world of loop-player is "world":
         send "&e%player%&e has left the game" to loop-player
@@ -272,24 +272,24 @@ command /join [<text>] [<text>]:
        execute console command "mv load s-%arg-1%-world"
        execute console command "mv load s-%arg-1%-nether"
        execute console command "mv load s-%arg-1%-end"
-      if {server::%arg-1%::firstjoin::%uuid of player%} is not set:
-       set {server::%arg-1%::world::%uuid of player%} to "s-%arg-1%-world"
+      if {server::%arg-1%::firstjoin::%player%} is not set:
+       set {server::%arg-1%::world::%player%} to "s-%arg-1%-world"
       execute console command "mvconfirm"
-      if {server::%arg-1%::firstjoin::%uuid of player%} is not set:
-       execute console command "mv tp %player% %{server::%arg-1%::world::%uuid of player%}%"
+      if {server::%arg-1%::firstjoin::%player%} is not set:
+       execute console command "mv tp %player% %{server::%arg-1%::world::%player%}%"
        wait 1 tick
-       set {server::%arg-1%::location::x::%uuid of player%} to x-coordinate of player
-       set {server::%arg-1%::location::y::%uuid of player%} to y-coordinate of player
-       set {server::%arg-1%::location::z::%uuid of player%} to z-coordinate of player
-       set {server::%arg-1%::spawnpoint::x::%uuid of player%} to x-coordinate of player
-       set {server::%arg-1%::spawnpoint::y::%uuid of player%} to y-coordinate of player
-       set {server::%arg-1%::spawnpoint::z::%uuid of player%} to z-coordinate of player
+       set {server::%arg-1%::location::x::%player%} to x-coordinate of player
+       set {server::%arg-1%::location::y::%player%} to y-coordinate of player
+       set {server::%arg-1%::location::z::%player%} to z-coordinate of player
+       set {server::%arg-1%::spawnpoint::x::%player%} to x-coordinate of player
+       set {server::%arg-1%::spawnpoint::y::%player%} to y-coordinate of player
+       set {server::%arg-1%::spawnpoint::z::%player%} to z-coordinate of player
       else:
-       execute console command "mv tp %player% e:%{server::%arg-1%::world::%uuid of player%}%:%round({server::%arg-1%::location::x::%uuid of player%})%,%round({server::%arg-1%::location::y::%uuid of player%})%,%round({server::%arg-1%::location::z::%uuid of player%})%"
+       execute console command "mv tp %player% e:%{server::%arg-1%::world::%player%}%:%round({server::%arg-1%::location::x::%player%})%,%round({server::%arg-1%::location::y::%player%})%,%round({server::%arg-1%::location::z::%player%})%"
        wait 1 tick
       wait 1 tick
-      if {server::%arg-1%::firstjoin::%uuid of player%} is not set:
-       set {server::%arg-1%::firstjoin::%uuid of player%} to true
+      if {server::%arg-1%::firstjoin::%player%} is not set:
+       set {server::%arg-1%::firstjoin::%player%} to true
       else:
        giveinv("server-%arg-1%", player)
       send "&eYou have joined the server."
@@ -310,7 +310,7 @@ command /hub [<text>]:
    set {_worldname} to "%world of player%"
    set {_worldcheck} to the first 2 characters of {_worldname}
    if {_worldcheck} is "s-":
-    set {server::%arg-1%::world::%uuid of player%} to "%{_worldname}%"
+    set {server::%arg-1%::world::%player%} to "%{_worldname}%"
     set {_world} to last length of "%world of player%" - 2 characters of "%world of player%"
     if last 6 characters of "%{_world}%" is "-world":
      set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
@@ -318,9 +318,9 @@ command /hub [<text>]:
      set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
     if last 4 characters of "%{_world}%" is "-end":
      set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
-    set {server::%{_world}%::location::x::%uuid of player%} to x-coordinate of player
-    set {server::%{_world}%::location::y::%uuid of player%} to y-coordinate of player
-    set {server::%{_world}%::location::z::%uuid of player%} to z-coordinate of player
+    set {server::%{_world}%::location::x::%player%} to x-coordinate of player
+    set {server::%{_world}%::location::y::%player%} to y-coordinate of player
+    set {server::%{_world}%::location::z::%player%} to z-coordinate of player
     set {_world} to "server-%{_world}%"
     wait 1 tick
    else:
@@ -377,11 +377,11 @@ on quit:
    set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
   if last 4 characters of "%{_world}%" is "-end":
    set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
-  set {server::%{_world}%::world::%uuid of player%} to "%world of player%"
+  set {server::%{_world}%::world::%player%} to "%world of player%"
   set {_world} to "server-%{_world}%"
-  set {server::%{_world}%::location::x::%uuid of player%} to x-coordinate of player
-  set {server::%{_world}%::location::y::%uuid of player%} to y-coordinate of player
-  set {server::%{_world}%::location::z::%uuid of player%} to z-coordinate of player
+  set {server::%{_world}%::location::x::%player%} to x-coordinate of player
+  set {server::%{_world}%::location::y::%player%} to y-coordinate of player
+  set {server::%{_world}%::location::z::%player%} to z-coordinate of player
   loop all players:
    if world of loop-player is "s-%{_world}%-world", "s-%{_world}%-nether" or "s-%{_world}%-end":
     send "&e%player%&e has left the game" to loop-player
@@ -409,7 +409,7 @@ on death:
   if last 4 characters of "%{_world}%" is "-end":
    set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
   wait 1 tick
-  execute console command "mv tp %player% e:s-%{_world}%-world:%{server::%{_world}%::spawnpoint::x::%uuid of player%}%,%{server::%{_world}%::spawnpoint::y::%uuid of player%}%,%{server::%{_world}%::spawnpoint::z::%uuid of player%}%"
+  execute console command "mv tp %player% e:s-%{_world}%-world:%{server::%{_world}%::spawnpoint::x::%player%}%,%{server::%{_world}%::spawnpoint::y::%player%}%,%{server::%{_world}%::spawnpoint::z::%player%}%"
   execute console command "mvconfirm"
 
 on death:
@@ -426,9 +426,9 @@ on rightclick:
   set {_world} to last length of "%world of player%" - 2 characters of "%world of player%"
   if last 6 characters of "%{_world}%" is "-world":
    set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
-   set {server::%{_world}%::spawnpoint::x::%uuid of player%} to x-coordinate of player
-   set {server::%{_world}%::spawnpoint::y::%uuid of player%} to y-coordinate of player
-   set {server::%{_world}%::spawnpoint::z::%uuid of player%} to z-coordinate of player
+   set {server::%{_world}%::spawnpoint::x::%player%} to x-coordinate of player
+   set {server::%{_world}%::spawnpoint::y::%player%} to y-coordinate of player
+   set {server::%{_world}%::spawnpoint::z::%player%} to z-coordinate of player
    if time in world is not night:
     send "Respawn point set"
     cancel event
