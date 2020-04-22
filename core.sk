@@ -16,7 +16,7 @@ on command:
 
 on join:
  if {stopping} is set:
-  kick the loop-player due to "Server is stopping..."
+  kick the player due to "Server is stopping..."
 
 on load:
  delete {stopping}
@@ -320,6 +320,7 @@ command /join [<text>] [<text>]:
        execute console command "mv load s-%arg-1%-world"
        execute console command "mv load s-%arg-1%-nether"
        execute console command "mv load s-%arg-1%-end"
+       set {server::%arg-1%::loaded} to true
       if {server::%arg-1%::firstjoin::%player%} is not set:
        set {server::%arg-1%::world::%player%} to "s-%arg-1%-world"
       execute console command "mvconfirm"
