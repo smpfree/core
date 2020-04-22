@@ -34,6 +34,72 @@ command /list [<text>]:
    send "&cYou do not own any SMP server!"
   send "&a----------------------------"
 
+command /invite [<text>] [<offline player>] [<text>]:
+ trigger:
+  if arg-2 is set:
+   if arg-3 is set:
+    send "&cThis command should not have a third argument."
+   else:
+    if arg-2 is offline:
+     send "&cYou can only invite players that are online."
+    else:
+     if arg-2 is player:
+      send "&cYou cannot invite yourself to a SMP server."
+     else:
+      if {server::%arg-1%} is set:
+       if {server::%arg-1%::owner} is uuid of player:
+        if {server::%arg-1%::users::%uuid of arg-2%} is set:
+         send "&cThis player already has access to the SMP server."
+        else:
+         set {server::%arg-1%::users::%uuid of arg-2%} to "member"
+         send "&eSuccessfully given this player access to the SMP server."
+       else:
+        send "&cOnly the SMP server owner can invite people to the server."
+      else:
+       send "&cA SMP server with this name does not exist."
+  else:
+   send "&cIncorrect usage. Please use ""/invite <server> <player>"" instead."
+
+command /kick [<text>] [<offline player>] [<text>]:
+ trigger:
+  if arg-2 is set:
+   if arg-3 is set:
+    send "&cThis command should not have a third argument."
+   else:
+    if "%arg-2%" is "%player%":
+     send "&cYou cannot kick yourself from a SMP server."
+    else:
+     if {server::%arg-1%} is set:
+      if {server::%arg-1%::owner} is uuid of player:
+       if {server::%arg-1%::users::%uuid of arg-2%} is set:
+        delete {server::%arg-1%::users::%uuid of arg-2%}
+        send "&eSuccessfully kicked this player from the SMP server."
+        if arg-2 is online:
+         loop all players:
+          if loop-player is arg-2:
+          set {_worldname} to "%world of loop-player%"
+          set {_worldcheck} to the first 2 characters of {_worldname}
+          if {_worldcheck} is "s-":
+           set {_world} to last length of "%world of loop-player%" - 2 characters of "%world of loop-player%"
+           if last 6 characters of "%{_world}%" is "-world":
+            set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
+           if last 7 characters of "%{_world}%" is "-nether":
+            set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
+           if last 4 characters of "%{_world}%" is "-end":
+            set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
+           if {_world} is arg-1:
+            make loop-player execute "hub"
+            send "&cYou have been kicked from the SMP server you were just on."
+            stop
+       else:
+        send "&cThis player already does not have access to the SMP server."
+      else:
+       send "&cOnly the SMP server owner can kick people from the server."
+     else:
+      send "&cA SMP server with this name does not exist."
+  else:
+   send "&cIncorrect usage. Please use ""/kick <server> <player>"" instead."
+
 every 1 seconds:
  loop all players:
   set {_worldname} to "%world of loop-player%"
