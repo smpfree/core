@@ -150,12 +150,15 @@ on chat:
    set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
   loop all players:
    if world of loop-player is "s-%{_world}%-world", "s-%{_world}%-nether" or "s-%{_world}%-end":
-    send "%player%: %message%" to loop-player
+    if {color::%player%} is set:
+     send "%player%&f: %message%" to loop-player
+    else:
+     send "%player%&f: %message%" to loop-player
  else:
-  send "[Hub] %player%: %message%" to console
+  send "[Hub] %player%&f: %message%" to console
   loop all players:
    if world of loop-player is world of player:
-    send "%player%: %message%" to loop-player
+    send "%player%&f: %message%" to loop-player
 
 command /setmaxservers [<offline player>] [<text>] [<text>]:
  trigger:
@@ -356,10 +359,10 @@ command /hub [<text>]:
     set {server::%{_world}%::location::x::%player%} to x-coordinate of player
     set {server::%{_world}%::location::y::%player%} to y-coordinate of player
     set {server::%{_world}%::location::z::%player%} to z-coordinate of player
-    set {_world} to "server-%{_world}%"
     loop all players:
      if world of loop-player is "s-%{_world}%-world", "s-%{_world}%-nether" or "s-%{_world}%-end":
-      send "&e%player%&e has joined the game" to loop-player
+      send "&e%player%&e has left the game" to loop-player
+    set {_world} to "server-%{_world}%"
     wait 1 tick
    else:
     set {_world} to "hub"
