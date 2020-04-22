@@ -1,7 +1,7 @@
 on command:
  if executor is player:
   if player is not op:
-   if command is "help", "hub", "list", "create", "delete" or "join":
+   if command is "help", "hub", "list", "create", "delete", "join" or "invite":
    else:
     cancel event
     send "&fUnknown command. Type ""/help"" for help."
@@ -25,8 +25,8 @@ command /list [<text>]:
  trigger:
   send "&a----- Your SMP Servers ------"
   loop {server::*}:
-   set {_own} to true
    if {server::%loop-index%::users::%player%} is set:
+    set {_own} to true
     if {server::%loop-index%::owner} is player:
      send "&b%loop-index% &f- &eOwner"
     else:
@@ -264,6 +264,9 @@ command /delete [<text>] [<text>]:
 
 command /join [<text>] [<text>]:
  trigger:
+  if world of player is not "world":
+   send "&cYou can only run this command in the hub."
+   stop
   if arg-1 is not set:
    send "&cIncorrect usage. Please use ""/join <server name>"" instead."
    stop
@@ -315,6 +318,12 @@ command /join [<text>] [<text>]:
        wait 1 tick
       wait 1 tick
       if {server::%arg-1%::firstjoin::%player%} is not set:
+       teleport player to location -960, 4, 403
+       clear player's inventory
+       remove fire from player
+       heal the player
+       feed the player
+       set xp of player to 0
        set {server::%arg-1%::firstjoin::%player%} to true
       else:
        giveinv("server-%arg-1%", player)
