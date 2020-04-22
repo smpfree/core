@@ -152,12 +152,38 @@ on chat:
    if world of loop-player is "s-%{_world}%-world", "s-%{_world}%-nether" or "s-%{_world}%-end":
     send "%player%: %message%" to loop-player
  else:
+  send "[Hub] %player%: %message%" to console
   loop all players:
    if world of loop-player is world of player:
     send "%player%: %message%" to loop-player
 
+command /setmaxservers [<offline player>] [<text>] [<text>]:
+ trigger:
+  if executor is console:
+   if arg-2 is set:
+    set {_max} to arg-2 parsed as a number
+    if {_max} is set:
+     if {_max} is less than 0:
+      send "&cThe second argument must be above 0."
+     else:
+      if {_max} is 0:
+       delete {maxservers::%arg-1%}
+      else:
+       set {maxservers::%arg-1%} to {_max}
+      send "&eSuccessfully set %arg-1%'s max servers to %{_max}%."
+    else:
+     send "&cThe second argument must be a number."
+   else:
+    send "&cIncorrect usage. Please use ""/setmaxservers <player> <amount>"" instead."
+  else:
+   send "&cOnly the console can run this command."
+
 command /create [<text>] [<text>]:
  trigger:
+  if {maxservers::%player%} is not set:
+   #set {maxservers::%player%} to 1
+   send "&cOnly alpha testers can make a SMP server at the moment."
+   stop
   if arg-1 is not set:
    send "&cIncorrect usage. Please use ""/create <server name>"" instead."
    stop
@@ -177,8 +203,8 @@ command /create [<text>] [<text>]:
      loop {server::*}:
       if {server::%loop-index%::owner} is player:
        add 1 to {_servers}
-     if {servers} is greater than 1:
-      send "&cYou have reached the maximum amount of servers you can make. (1)"
+     if {servers} is greater than {maxservers::%player%}:
+      send "&cYou have reached the maximum amount of servers you can make. (%{maxservers::%player%}%)"
       stop
      else:
       send "&eYour private SMP server is being created..."
