@@ -1,7 +1,63 @@
+on place:
+ if player is not op:
+  if world of player is "world":
+   cancel event
+
+on break:
+ if player is not op:
+  if world of player is "world":
+   cancel event
+
+on drop:
+ if world of player is "world":
+  cancel event
+
+on damage:
+ if world of attacker is "world":
+  cancel event
+
+on rightclick:
+ world of player is "world"
+ player is holding diamond
+ name of player's held item is "&eJoin Official SMP Server"
+ cancel event
+ make player execute "join official"
+
+on rightclick:
+ world of player is "world"
+ player is holding clock
+ name of player's held item is "&aQuick Join"
+ cancel event
+ if {hubclock::%player%} is not set:
+  send "&cThis clock has not been set yet. You can set this clock using the command ""/setclock""."
+  stop
+ else:
+  make player execute "join %{hubclock::%player%}%"
+ 
+
+command /setclock [<text>] [<text>]:
+ trigger:
+  if arg-1 is set:
+   if arg-2 is set:
+    send "&cA server name does not consist of two arguments."
+   else:
+    send "&aSuccessfully set your clock!"
+    set {hubclock::%player%} to arg-1
+  else:
+   send "&cIncorrect usage. Please use ""/setclock <server name>"" instead."
+
+command /unsetclock [<text>]:
+ trigger:
+  if {hubclock::%player%} is not set:
+   send "&cYour clock was already not set."
+  else:
+   send "&aSuccessfully unset your clock!"
+   delete {hubclock::%player%}
+
 on command:
  if executor is player:
   if player is not op:
-   if command is "help", "hub", "list", "create", "delete", "join" or "invite":
+   if command is "help", "hub", "list", "create", "delete", "join", "invite", "setclock", "unsetclock":
     cancel event
     send "&fUnknown command. Type ""/help"" for help."
   else:
@@ -61,6 +117,8 @@ command /help [<text>]:
   send "&b/create &f- &eCreate a SMP server."
   send "&b/delete &f- &eDelete a SMP server."
   send "&b/join &f- &eJoin a SMP server."
+  send "&b/setclock &f- &eSet the quick join clock at the hub."
+  send "&b/unsetclock &f- &eUnset the quick join clock at the hub."
   send "&a----------------"
 
 command /list [<text>]:
@@ -325,7 +383,12 @@ command /join [<text>] [<text>]:
      make player execute "hub"
      stop
     if {server::%arg-1%} is set:
+     set {_join} to false
      if {server::%arg-1%::users::%player%} is set:
+      set {_join} to true
+     if arg-1 is "official":
+      set {_join} to true
+     if {_join} is true:
       loop all players:
        if world of loop-player is "world":
         send "&e%player%&e has left the game" to loop-player
@@ -427,6 +490,8 @@ command /hub [<text>]:
   feed the player
   set xp of player to 0
   execute console command "effect clear %player%"
+  give player 1 diamond named "&eJoin Official SMP Server"
+  give player 1 clock named "&aQuick Join" with lore "&r&dYou can use the command ""/setclock"" to set this clock." and "&r&bRight click to join."
   send "&eYou have been sent to the hub."
   stop
 
