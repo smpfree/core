@@ -1,0 +1,53 @@
+command /gamemode [<text>] [<offline player>]:
+ trigger:
+  set {_s} to serverOfPlayer(player)
+  if {_s} is not "hub":
+   if {server::%{_s}%::users::%player%} is "op":
+    if arg-1 is set:
+     if arg-1 is "survival", "creative", "adventure", "spectator", "0", "1", "2", "3", "s", "c", "a" or "sp":
+      if arg-1 is "survival", "0" or "s":
+       set {_mode} to survival
+      if arg-1 is "creative", "1" or "c":
+       set {_mode} to creative
+      if arg-1 is "adventure", "2" or "a":
+       set {_mode} to adventure
+      if arg-1 is "spectator", "3" or "sp":
+       set {_mode} to spectator
+      if arg-2 is set:
+       if arg-2 is offline:
+        send "&cThe player must be online."
+        stop
+       if "%serverOfPlayer(arg-2)%" is not "%{_s}%":
+        send "&cThe player must be online."
+        stop
+       set {_p} to arg-2
+      else:
+       set {_p} to player
+      set gamemode of {_p} to {_mode}
+      send "&aSuccessfully changed the gamemode to %{_mode}%."
+     else:
+      send "&cThis gamemode does not exist. The list of gamemodes are ""survival"", ""creative"", ""adventure"" and ""spectator""."
+    else:
+     send "&cIncorrect usage. Please use ""/gamemode <mode> [player]"" instead."
+   else:
+    send "&cYou have no permission to this command."
+  else:
+   if player is not op:
+    send "&cYou have no permission to this command."
+   else:
+    send "&cPlease use ""/minecraft:gamemode"" instead."
+
+function serverOfPlayer(p: player) :: string:
+ set {_worldname} to "%world of {_p}%"
+ set {_worldcheck} to the first 2 characters of {_worldname}
+ if {_worldcheck} is "s-":
+  set {_world} to last length of "%world of {_p}%" - 2 characters of "%world of {_p}%"
+  if last 6 characters of "%{_world}%" is "-world":
+   set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
+  if last 7 characters of "%{_world}%" is "-nether":
+   set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
+  if last 4 characters of "%{_world}%" is "-end":
+   set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
+  return {_world}
+ else:
+  return "hub"
