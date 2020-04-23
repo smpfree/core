@@ -443,9 +443,9 @@ command /join [<text>] [<text>]:
       loop all players:
        if world of loop-player is "s-%arg-1%-world", "s-%arg-1%-nether" or "s-%arg-1%-end":
         send "&e%player%&e has joined the game" to loop-player
-      wait 1 second
-      execute console command "tp %player% %{server::%arg-1%::location::x::%player%}% %{server::%arg-1%::location::y::%player%}% %{server::%arg-1%::location::z::%player%}%"
       stop
+      wait 1 second
+      kill the player
      else:
       send "&cYou have no permission to join this server."
       stop
