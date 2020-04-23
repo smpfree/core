@@ -2,9 +2,16 @@ on command:
  if executor is player:
   if player is not op:
    if command is "help", "hub", "list", "create", "delete", "join" or "invite":
-   else:
     cancel event
     send "&fUnknown command. Type ""/help"" for help."
+  else:
+   if command is "stop":
+    cancel event
+    set {stopping} to true
+    loop all players:
+     kick the loop-player due to "Server is stopping..."
+    wait 10 seconds
+    execute console command "minecraft:stop"
  else:
   if command is "stop":
    cancel event
@@ -12,7 +19,7 @@ on command:
    loop all players:
     kick the loop-player due to "Server is stopping..."
    wait 10 seconds
-   execute console command "stop"
+   execute console command "minecraft:stop"
 
 on command:
  if executor is player:
@@ -39,6 +46,7 @@ on join:
 
 on load:
  delete {stopping}
+ delete {cooldown::*}
 
 on rightclick on sign:
  if world of player is not "world":
