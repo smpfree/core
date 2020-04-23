@@ -470,9 +470,6 @@ command /hub [<text>]:
     set {server::%{_world}%::location::x::%player%} to x-coordinate of player
     set {server::%{_world}%::location::y::%player%} to y-coordinate of player
     set {server::%{_world}%::location::z::%player%} to z-coordinate of player
-    send "{server::%{_world}%::location::x::%player%} = %{server::%{_world}%::location::x::%player%}%"
-    send "{server::%{_world}%::location::y::%player%} = %{server::%{_world}%::location::y::%player%}%"
-    send "{server::%{_world}%::location::z::%player%} = %{server::%{_world}%::location::z::%player%}%"
     loop all players:
      if world of loop-player is "s-%{_world}%-world", "s-%{_world}%-nether" or "s-%{_world}%-end":
       send "&e%player%&e has left the game" to loop-player
