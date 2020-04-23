@@ -71,6 +71,7 @@ on command:
  else:
   if command is "stop":
    cancel event
+   send "Server will stop in 10 seconds."
    set {stopping} to true
    loop all players:
     kick the loop-player due to "Server is stopping..."
@@ -442,6 +443,8 @@ command /join [<text>] [<text>]:
       loop all players:
        if world of loop-player is "s-%arg-1%-world", "s-%arg-1%-nether" or "s-%arg-1%-end":
         send "&e%player%&e has joined the game" to loop-player
+      wait 1 second
+      execute console command "tp %player% %{server::%arg-1%::location::x::%player%}% %{server::%arg-1%::location::y::%player%}% %{server::%arg-1%::location::z::%player%}%"
       stop
      else:
       send "&cYou have no permission to join this server."
@@ -467,6 +470,9 @@ command /hub [<text>]:
     set {server::%{_world}%::location::x::%player%} to x-coordinate of player
     set {server::%{_world}%::location::y::%player%} to y-coordinate of player
     set {server::%{_world}%::location::z::%player%} to z-coordinate of player
+    send "{server::%{_world}%::location::x::%player%} = %{server::%{_world}%::location::x::%player%}%"
+    send "{server::%{_world}%::location::y::%player%} = %{server::%{_world}%::location::y::%player%}%"
+    send "{server::%{_world}%::location::z::%player%} = %{server::%{_world}%::location::z::%player%}%"
     loop all players:
      if world of loop-player is "s-%{_world}%-world", "s-%{_world}%-nether" or "s-%{_world}%-end":
       send "&e%player%&e has left the game" to loop-player
