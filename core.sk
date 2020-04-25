@@ -134,9 +134,10 @@ command /help [<text>]:
    send "&b/help &f- &eShows the help menu."
    send "&b/hub &f- &eGo to the hub."
    if {realm::%{_world}%::users::%player%} is "op":
-    send "&b/gamemode &f- Set the gamemode of a player."
-    send "&b/clear &f- Clear the inventory of a player."
-    send "&b/defaultgamemode &f- Set the default gamemode of the SMP realm."
+    send "&b/gamemode &f- &eSet the gamemode of a player."
+    send "&b/clear &f- &eClear the inventory of a player."
+    send "&b/defaultgamemode &f- &eSet the default gamemode of the SMP realm."
+    send "&b/gamerule &f- &eManage the gamerules of the SMP realm."
    send "&a----------------"
 
 command /list [<text>]:
