@@ -1,3 +1,74 @@
+#command /command [<text>]:
+# trigger:
+#  set {_s} to realmOfPlayer(player)
+#  if {_s} is not "hub":
+#   if {realm::%{_s}%::users::%player%} is "op":
+#    # do stuff
+#   else:
+#    send "&cYou have no permission to this command."
+#  else:
+#   if player is not op:
+#    send "&cYou have no permission to this command."
+#   else:
+#    send "&cPlease use ""/minecraft:[command]"" instead."
+
+command /op [<player>] [<text>]:
+ trigger:
+  set {_s} to realmOfPlayer(player)
+  if {_s} is not "hub":
+   if {realm::%{_s}%::users::%player%} is "op":
+    if arg-1 is set:
+     if arg-2 is set:
+      send "&cThere should not be a second argument."
+      stop
+     if {realm::%{_s}%::users::%arg-1%} is set:
+      if {realm::%{_s}%::users::%arg-1%} is "op":
+       send "&cThis player is already an operator."
+      else:
+       send "&aSuccessfully made this player an operator."
+       set {realm::%{_s}%::users::%arg-1%} to "op"
+     else:
+      send "&cThis player does not have access to the SMP realm."
+    else:
+     send "&cIncorrect usage. Please use ""/op <player>"" instead."
+   else:
+    send "&cYou have no permission to this command."
+  else:
+   if player is not op:
+    send "&cYou have no permission to this command."
+   else:
+    send "&cPlease use ""/minecraft:op"" instead."
+
+command /deop [<player>] [<text>]:
+ trigger:
+  set {_s} to realmOfPlayer(player)
+  if {_s} is not "hub":
+   if {realm::%{_s}%::users::%player%} is "op":
+    if arg-1 is set:
+     if arg-2 is set:
+      send "&cThere should not be a second argument."
+      stop
+     if {realm::%{_s}%::users::%arg-1%} is set:
+      if {realm::%{_s}%::users::%arg-1%} is "op":
+       if {realm::%{_s}%::owner} is "%arg-1%":
+        send "&cYou cannot remove the operator permissions from the realm owner."
+       else:
+        send "&aSuccessfully removed this player from being an operator."
+        set {realm::%{_s}%::users::%arg-1%} to "member"
+      else:
+       send "&cThis player was already not an operator."
+     else:
+      send "&cThis player does not have access to the SMP realm."
+    else:
+     send "&cIncorrect usage. Please use ""/op <player>"" instead."
+   else:
+    send "&cYou have no permission to this command."
+  else:
+   if player is not op:
+    send "&cYou have no permission to this command."
+   else:
+    send "&cPlease use ""/minecraft:deop"" instead."
+
 command /gamemode [<text>] [<offline player>] [<text>]:
  trigger:
   set {_s} to realmOfPlayer(player)
