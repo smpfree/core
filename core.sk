@@ -582,6 +582,7 @@ on quit:
 
 on join:
  set join message to ""
+ clear inventory of player
  make player execute "hub"
  stop
 
