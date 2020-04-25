@@ -19,7 +19,7 @@ on damage:
 on rightclick:
  world of player is "world"
  player is holding diamond
- name of player's held item is "&eJoin Official SMP Server"
+ name of player's held item is "&eJoin Official SMP Realm"
  cancel event
  make player execute "join official"
 
@@ -33,18 +33,17 @@ on rightclick:
   stop
  else:
   make player execute "join %{hubclock::%player%}%"
- 
 
 command /setclock [<text>] [<text>]:
  trigger:
   if arg-1 is set:
    if arg-2 is set:
-    send "&cA server name does not consist of two arguments."
+    send "&cA realm name does not consist of two arguments."
    else:
     send "&aSuccessfully set your clock!"
     set {hubclock::%player%} to arg-1
   else:
-   send "&cIncorrect usage. Please use ""/setclock <server name>"" instead."
+   send "&cIncorrect usage. Please use ""/setclock <realm name>"" instead."
 
 command /unsetclock [<text>]:
  trigger:
@@ -57,45 +56,43 @@ command /unsetclock [<text>]:
 on command:
  if executor is player:
   if player is not op:
-   if command is "help", "hub", "list", "create", "delete", "join", "invite", "setclock", "unsetclock":
+   if command is "help", "hub", "list", "create", "delete", "join", "invite", "setclock", "unsetclock", "gamemode", "clear" or "defaultgamemode":
     cancel event
     send "&fUnknown command. Type ""/help"" for help."
   else:
+   if {oplimit::%player%} is set:
+    if command is not {oplimit::%player%}:
+     cancel event
+    else:
+     deop the player
+     delete {oplimit::%player%}
+    stop
    if command is "stop":
     cancel event
     set {stopping} to true
     loop all players:
      kick the loop-player due to "Server is stopping..."
-    wait 10 seconds
-    execute console command "minecraft:stop"
  else:
   if command is "stop":
    cancel event
-   send "Server will stop in 10 seconds."
+   send "Server will stop after the SMP realms unload."
    set {stopping} to true
    loop all players:
     kick the loop-player due to "Server is stopping..."
-   wait 10 seconds
-   execute console command "minecraft:stop"
 
 on command:
  if executor is player:
-  if {cooldown::%player%} is not set:
-   set {cooldown::%player%} to 5
-   wait 1 second
-   set {cooldown::%player%} to 4
-   wait 1 second
-   set {cooldown::%player%} to 3
-   wait 1 second
-   set {cooldown::%player%} to 2
-   wait 1 second
-   set {cooldown::%player%} to 1
-   wait 1 second
-   delete {cooldown::%player%}
-  else:
-   if command is not "hub":
-    cancel event
-    send "&cWait %{cooldown::%player%}% seconds before running another command."
+  if player is not op:
+   if {cooldown::%player%} is not set:
+    set {cooldown::%player%} to 2
+    wait 1 second
+    set {cooldown::%player%} to 1
+    wait 1 second
+    delete {cooldown::%player%}
+   else:
+    if command is not "hub":
+     cancel event
+     send "&cWait %{cooldown::%player%}% seconds before running another command."
 
 on join:
  if {stopping} is set:
@@ -111,32 +108,52 @@ on rightclick on sign:
 
 command /help [<text>]:
  trigger:
-  send "&a----- Help -----"
-  send "&b/help &f- &eShows the help menu."
-  send "&b/hub &f- &eGo to the hub."
-  send "&b/list &f- &eShows the list of SMP servers you have access to."
-  send "&b/create &f- &eCreate a SMP server."
-  send "&b/delete &f- &eDelete a SMP server."
-  send "&b/join &f- &eJoin a SMP server."
-  send "&b/setclock &f- &eSet the quick join clock at the hub."
-  send "&b/unsetclock &f- &eUnset the quick join clock at the hub."
-  send "&a----------------"
+  if world of player is "world":
+   send "&a----- Help -----"
+   send "&b/help &f- &eShows the help menu."
+   send "&b/hub &f- &eGo to the hub."
+   send "&b/list &f- &eShows the list of SMP realms you have access to."
+   send "&b/create &f- &eCreate a SMP realm."
+   send "&b/delete &f- &eDelete a SMP realm."
+   send "&b/join &f- &eJoin a SMP realm."
+   send "&b/setclock &f- &eSet the quick join clock at the hub."
+   send "&b/unsetclock &f- &eUnset the quick join clock at the hub."
+   send "&a----------------"
+  else:
+   set {_worldname} to "%world of player%"
+   set {_worldcheck} to the first 2 characters of {_worldname}
+   if {_worldcheck} is "s-":
+    set {_world} to last length of "%world of player%" - 2 characters of "%world of player%"
+    if last 6 characters of "%{_world}%" is "-world":
+     set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
+    if last 7 characters of "%{_world}%" is "-nether":
+     set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
+    if last 4 characters of "%{_world}%" is "-end":
+     set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
+   send "&a----- Help -----"
+   send "&b/help &f- &eShows the help menu."
+   send "&b/hub &f- &eGo to the hub."
+   if {realm::%{_world}%::users::%player%} is "op":
+    send "&b/gamemode &f- Set the gamemode of a player."
+    send "&b/clear &f- Clear the inventory of a player."
+    send "&b/defaultgamemode &f- Set the default gamemode of the SMP realm."
+   send "&a----------------"
 
 command /list [<text>]:
  trigger:
-  send "&a----- Your SMP Servers ------"
-  loop {server::*}:
-   if {server::%loop-index%::users::%player%} is set:
+  send "&a----- Your SMP realms ------"
+  loop {realm::*}:
+   if {realm::%loop-index%::users::%player%} is set:
     set {_own} to true
-    if {server::%loop-index%::owner} is player:
+    if {realm::%loop-index%::owner} is player:
      send "&b%loop-index% &f- &eOwner"
     else:
-     if {server::%loop-index%::users::%player%} is "op":
+     if {realm::%loop-index%::users::%player%} is "op":
       send "&b%loop-index% &f- &eOP"
      else:
       send "&b%loop-index% &f- &eMember"
   if {_own} is not true:
-   send "&cYou do not own any SMP server!"
+   send "&cYou do not own any SMP realm!"
   send "&a----------------------------"
 
 command /invite [<text>] [<offline player>] [<text>]:
@@ -149,21 +166,21 @@ command /invite [<text>] [<offline player>] [<text>]:
      send "&cYou can only invite players that are online."
     else:
      if arg-2 is player:
-      send "&cYou cannot invite yourself to a SMP server."
+      send "&cYou cannot invite yourself to a SMP realm."
      else:
-      if {server::%arg-1%} is set:
-       if {server::%arg-1%::owner} is player:
-        if {server::%arg-1%::users::%arg-2%} is set:
-         send "&cThis player already has access to the SMP server."
+      if {realm::%arg-1%} is set:
+       if {realm::%arg-1%::owner} is player:
+        if {realm::%arg-1%::users::%arg-2%} is set:
+         send "&cThis player already has access to the SMP realm."
         else:
-         set {server::%arg-1%::users::%arg-2%} to "member"
-         send "&eSuccessfully given this player access to the SMP server."
+         set {realm::%arg-1%::users::%arg-2%} to "member"
+         send "&eSuccessfully given this player access to the SMP realm."
        else:
-        send "&cOnly the SMP server owner can invite people to the server."
+        send "&cOnly the SMP realm owner can invite people to the realm."
       else:
-       send "&cA SMP server with this name does not exist."
+       send "&cA SMP realm with this name does not exist."
   else:
-   send "&cIncorrect usage. Please use ""/invite <server> <player>"" instead."
+   send "&cIncorrect usage. Please use ""/invite <realm> <player>"" instead."
 
 command /kick [<text>] [<offline player>] [<text>]:
  trigger:
@@ -172,13 +189,13 @@ command /kick [<text>] [<offline player>] [<text>]:
     send "&cThis command should not have a third argument."
    else:
     if "%arg-2%" is "%player%":
-     send "&cYou cannot kick yourself from a SMP server."
+     send "&cYou cannot kick yourself from a SMP realm."
     else:
-     if {server::%arg-1%} is set:
-      if {server::%arg-1%::owner} is player:
-       if {server::%arg-1%::users::%arg-2%} is set:
-        delete {server::%arg-1%::users::%arg-2%}
-        send "&eSuccessfully kicked this player from the SMP server."
+     if {realm::%arg-1%} is set:
+      if {realm::%arg-1%::owner} is player:
+       if {realm::%arg-1%::users::%arg-2%} is set:
+        delete {realm::%arg-1%::users::%arg-2%}
+        send "&eSuccessfully kicked this player from the SMP realm."
         if arg-2 is online:
          set {_worldname} to "%world of arg-2%"
          set {_worldcheck} to the first 2 characters of {_worldname}
@@ -192,16 +209,16 @@ command /kick [<text>] [<offline player>] [<text>]:
            set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
           if {_world} is arg-1:
            make arg-2 execute "hub"
-           send "&cYou have been kicked from the SMP server you were just on."
+           send "&cYou have been kicked from the SMP realm you were just on."
            stop
        else:
-        send "&cThis player already does not have access to the SMP server."
+        send "&cThis player already does not have access to the SMP realm."
       else:
-       send "&cOnly the SMP server owner can kick people from the server."
+       send "&cOnly the SMP realm owner can kick people from the realm."
      else:
-      send "&cA SMP server with this name does not exist."
+      send "&cA SMP realm with this name does not exist."
   else:
-   send "&cIncorrect usage. Please use ""/kick <server> <player>"" instead."
+   send "&cIncorrect usage. Please use ""/kick <realm> <player>"" instead."
 
 every 1 seconds:
  loop all players:
@@ -262,7 +279,7 @@ on chat:
     else:
      send "%player%&f: %message%" to loop-players
 
-command /setmaxservers [<offline player>] [<text>] [<text>]:
+command /setmaxrealms [<offline player>] [<text>] [<text>]:
  trigger:
   if executor is console:
    if arg-2 is set:
@@ -272,50 +289,56 @@ command /setmaxservers [<offline player>] [<text>] [<text>]:
       send "&cThe second argument must be above 0."
      else:
       if {_max} is 0:
-       delete {maxservers::%arg-1%}
+       delete {maxrealms::%arg-1%}
       else:
-       set {maxservers::%arg-1%} to {_max}
-      send "&eSuccessfully set %arg-1%'s max servers to %{_max}%."
+       set {maxrealms::%arg-1%} to {_max}
+      send "&eSuccessfully set %arg-1%'s max realms to %{_max}%."
     else:
      send "&cThe second argument must be a number."
    else:
-    send "&cIncorrect usage. Please use ""/setmaxservers <player> <amount>"" instead."
+    send "&cIncorrect usage. Please use ""/setmaxrealms <player> <amount>"" instead."
   else:
    send "&cOnly the console can run this command."
 
 command /create [<text>] [<text>]:
  trigger:
-  if {maxservers::%player%} is not set:
-   #set {maxservers::%player%} to 1
-   send "&cOnly alpha testers can make a SMP server at the moment."
+  if {maxrealms::%player%} is not set:
+   #set {maxrealms::%player%} to 1
+   send "&cOnly alpha testers can make (a) SMP realm(s) the moment."
    stop
   if arg-1 is not set:
-   send "&cIncorrect usage. Please use ""/create <server name>"" instead."
+   send "&cIncorrect usage. Please use ""/create <realm name>"" instead."
    stop
   else:
    if arg-2 is set:
-    send "&cIncorrect usage. The server name should only contain one argument."
+    send "&cIncorrect usage. The realm name should only contain one argument."
     stop
    else:
-    if arg-1 is "hub":
-     send "&cA server with this name already exists."
+    if length of arg-1 < 3:
+     send "&cA realm name must be at least 3 characters."
      stop
-    if {server::%arg-1%} is set:
-     send "&cA server with this name already exists."
+    if length of arg-1 > 10:
+     send "&cA realm name cannot be more than 10 characters."
+     stop
+    if arg-1 is "hub":
+     send "&cA realm with this name already exists."
+     stop
+    if {realm::%arg-1%} is set:
+     send "&cA realm with this name already exists."
      stop
     else:
-     set {_servers} to 0
-     loop {server::*}:
-      if {server::%loop-index%::owner} is player:
-       add 1 to {_servers}
-     if {_servers} is greater than {maxservers::%player%}:
-      send "&cYou have reached the maximum amount of servers you can make. (%{maxservers::%player%}%)"
+     set {_realms} to 0
+     loop {realm::*}:
+      if {realm::%loop-index%::owner} is player:
+       add 1 to {_realms}
+     if {_realms} is greater than {maxrealms::%player%}:
+      send "&cYou have reached the maximum amount of realms you can make. (%{maxrealms::%player%}%)"
       stop
      else:
-      send "&eYour private SMP server is being created..."
-      set {server::%arg-1%} to "free"
-      set {server::%arg-1%::owner} to player
-      set {server::%arg-1%::users::%player%} to "op"
+      send "&eYour private SMP realm is being created..."
+      set {realm::%arg-1%} to "free"
+      set {realm::%arg-1%::owner} to player
+      set {realm::%arg-1%::users::%player%} to "op"
       execute console command "mv create s-%arg-1%-world normal"
       execute console command "mv create s-%arg-1%-nether nether"
       execute console command "mv create s-%arg-1%-end end"
@@ -325,46 +348,50 @@ command /create [<text>] [<text>]:
       execute console command "mvnp link end s-%arg-1%-end s-%arg-1%-world"
       execute console command "mvnp link end s-%arg-1%-nether s-%arg-1%-end"
       execute console command "mvnp link nether s-%arg-1%-end s-%arg-1%-nether"
-      send "&eYour server has been created."
-      set {server::%arg-1%::loaded} to true
+      send "&eYour realm has been created."
+      set {realm::%arg-1%::loaded} to true
       stop
 
 command /delete [<text>] [<text>]:
  trigger:
   if arg-1 is not set:
-   send "&cIncorrect usage. Please use ""/delete <server name>"" instead."
+   send "&cIncorrect usage. Please use ""/delete <realm name>"" instead."
    stop
   else:
    if arg-2 is set:
-    send "&cIncorrect usage. The server name should only contain one argument."
+    send "&cIncorrect usage. The realm name should only contain one argument."
     stop
    else:
-    if {server::%arg-1%} is set:
-     if {server::%arg-1%::owner} is player:
-      send "&eDeleting server..."
+    if {realm::%arg-1%} is set:
+     if {realm::%arg-1%::owner} is player:
+      send "&eDeleting realm..."
       loop all players:
        if world of loop-player is "s-%arg-1%-world", "s-%arg-1%-nether" or "s-%arg-1%-end":
         execute loop-player command "hub"
       wait 1 tick
-      delete {server::%arg-1%::*}
-      if {server::%arg-1%::loaded} is not true:
+      delete {realm::%arg-1%::*}
+      if {realm::%arg-1%::loaded} is not true:
        execute console command "mv load s-%arg-1%-world"
        execute console command "mv load s-%arg-1%-nether"
        execute console command "mv load s-%arg-1%-end"
+      wait 1 second
       execute console command "mv delete s-%arg-1%-world"
       execute console command "mvconfirm"
+      wait 1 second
       execute console command "mv delete s-%arg-1%-nether"
       execute console command "mvconfirm"
+      wait 1 second
       execute console command "mv delete s-%arg-1%-end"
       execute console command "mvconfirm"
-      delete {server::%arg-1%}
-      send "&eYour server has been deleted."
+      wait 1 second
+      delete {realm::%arg-1%}
+      send "&eYour realm has been deleted."
       stop
      else:
-      send "&cYou do not own this server."
+      send "&cYou do not own this realm."
       stop
     else:
-     send "&cA server with this name does not exists."
+     send "&cA realm with this name does not exists."
      stop
 
 command /join [<text>] [<text>]:
@@ -373,19 +400,19 @@ command /join [<text>] [<text>]:
    send "&cYou can only run this command at the hub."
    stop
   if arg-1 is not set:
-   send "&cIncorrect usage. Please use ""/join <server name>"" instead."
+   send "&cIncorrect usage. Please use ""/join <realm name>"" instead."
    stop
   else:
    if arg-2 is set:
-    send "&cIncorrect usage. The server name should only contain one argument."
+    send "&cIncorrect usage. The realm name should only contain one argument."
     stop
    else:
     if arg-1 is "hub":
      make player execute "hub"
      stop
-    if {server::%arg-1%} is set:
+    if {realm::%arg-1%} is set:
      set {_join} to false
-     if {server::%arg-1%::users::%player%} is set:
+     if {realm::%arg-1%::users::%player%} is set:
       set {_join} to true
      if arg-1 is "official":
       set {_join} to true
@@ -403,54 +430,54 @@ command /join [<text>] [<text>]:
         set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
        if last 4 characters of "%{_world}%" is "-end":
         set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
-       set {_world} to "server-%{_world}%"
+       set {_world} to "realm-%{_world}%"
       else:
        set {_world} to "hub"
       saveinv("%{_world}%", player)
-      if {server::%arg-1%::loaded} is not true:
+      if {realm::%arg-1%::loaded} is not true:
        execute console command "mv load s-%arg-1%-world"
        execute console command "mv load s-%arg-1%-nether"
        execute console command "mv load s-%arg-1%-end"
-       set {server::%arg-1%::loaded} to true
-      if {server::%arg-1%::firstjoin::%player%} is not set:
-       set {server::%arg-1%::world::%player%} to "s-%arg-1%-world"
+       set {realm::%arg-1%::loaded} to true
+      if {realm::%arg-1%::firstjoin::%player%} is not set:
+       set {realm::%arg-1%::world::%player%} to "s-%arg-1%-world"
       execute console command "mvconfirm"
-      if {server::%arg-1%::firstjoin::%player%} is not set:
-       execute console command "mv tp %player% %{server::%arg-1%::world::%player%}%"
-       wait 1 tick
-       set {server::%arg-1%::location::x::%player%} to x-coordinate of player
-       set {server::%arg-1%::location::y::%player%} to y-coordinate of player
-       set {server::%arg-1%::location::z::%player%} to z-coordinate of player
-       set {server::%arg-1%::spawnpoint::x::%player%} to x-coordinate of player
-       set {server::%arg-1%::spawnpoint::y::%player%} to y-coordinate of player
-       set {server::%arg-1%::spawnpoint::z::%player%} to z-coordinate of player
-      else:
-       execute console command "mv tp %player% e:%{server::%arg-1%::world::%player%}%:%round({server::%arg-1%::location::x::%player%})%,%round({server::%arg-1%::location::y::%player%})%,%round({server::%arg-1%::location::z::%player%})%"
-       wait 1 tick
+      execute console command "mv tp %player% %{realm::%arg-1%::world::%player%}%"
       wait 1 tick
-      if {server::%arg-1%::firstjoin::%player%} is not set:
-       teleport player to location -960, 4, 403
+      if {realm::%arg-1%::firstjoin::%player%} is not set:
+       kill the player
+       wait 1 tick
        clear player's inventory
        remove fire from player
        heal the player
        feed the player
        set xp of player to 0
-       set {server::%arg-1%::firstjoin::%player%} to true
+       set {realm::%arg-1%::location::x::%player%} to x-coordinate of player
+       set {realm::%arg-1%::location::y::%player%} to y-coordinate of player
+       set {realm::%arg-1%::location::z::%player%} to z-coordinate of player
+       set {realm::%arg-1%::spawnpoint::x::%player%} to x-coordinate of player
+       set {realm::%arg-1%::spawnpoint::y::%player%} to y-coordinate of player
+       set {realm::%arg-1%::spawnpoint::z::%player%} to z-coordinate of player
+       set {realm::%arg-1%::firstjoin::%player%} to true
       else:
-       giveinv("server-%arg-1%", player)
-      send "&eYou have joined the server."
-      execute console command "effect clear %player%" # temp
+       teleport player to location {realm::%arg-1%::location::x::%player%}, {realm::%arg-1%::location::y::%player%}, {realm::%arg-1%::location::z::%player%}
+       giveinv("realm-%arg-1%", player)
+      if {realm::%arg-1%::defaultgamemode} is set:
+       set gamemode of player to {realm::%arg-1%::defaultgamemode}
+      else:
+       set gamemode of player to survival
+      execute console command "minecraft:effect clear %player%" # temp
+      loop 300 times:
+       send "" to player
       loop all players:
        if world of loop-player is "s-%arg-1%-world", "s-%arg-1%-nether" or "s-%arg-1%-end":
         send "&e%player%&e has joined the game" to loop-player
       stop
-      wait 1 second
-      kill the player
      else:
-      send "&cYou have no permission to join this server."
+      send "&cYou have no permission to join this realm."
       stop
     else:
-     send "&cA server with this name does not exists."
+     send "&cA realm with this name does not exists."
      stop
 
 command /hub [<text>]:
@@ -459,7 +486,7 @@ command /hub [<text>]:
    set {_worldname} to "%world of player%"
    set {_worldcheck} to the first 2 characters of {_worldname}
    if {_worldcheck} is "s-":
-    set {server::%arg-1%::world::%player%} to "%{_worldname}%"
+    set {realm::%arg-1%::world::%player%} to "%{_worldname}%"
     set {_world} to last length of "%world of player%" - 2 characters of "%world of player%"
     if last 6 characters of "%{_world}%" is "-world":
      set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
@@ -467,13 +494,13 @@ command /hub [<text>]:
      set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
     if last 4 characters of "%{_world}%" is "-end":
      set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
-    set {server::%{_world}%::location::x::%player%} to x-coordinate of player
-    set {server::%{_world}%::location::y::%player%} to y-coordinate of player
-    set {server::%{_world}%::location::z::%player%} to z-coordinate of player
+    set {realm::%{_world}%::location::x::%player%} to x-coordinate of player
+    set {realm::%{_world}%::location::y::%player%} to y-coordinate of player
+    set {realm::%{_world}%::location::z::%player%} to z-coordinate of player
     loop all players:
      if world of loop-player is "s-%{_world}%-world", "s-%{_world}%-nether" or "s-%{_world}%-end":
       send "&e%player%&e has left the game" to loop-player
-    set {_world} to "server-%{_world}%"
+    set {_world} to "realm-%{_world}%"
     wait 1 tick
    else:
     set {_world} to "hub"
@@ -492,8 +519,8 @@ command /hub [<text>]:
   heal the player
   feed the player
   set xp of player to 0
-  execute console command "effect clear %player%"
-  give player 1 diamond named "&eJoin Official SMP Server"
+  execute console command "minecraft:effect clear %player%"
+  give player 1 diamond named "&eJoin Official SMP realm"
   give player 1 clock named "&aQuick Join" with lore "&r&dYou can use the command ""/setclock"" to set this clock." and "&r&bRight click to join."
   send "&eYou have been sent to the hub."
   stop
@@ -512,13 +539,16 @@ every 5 seconds:
    if last 4 characters of "%{_world}%" is "-end":
     set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
    set {_worlds::%{_world}%} to true
- loop {server::*}:
+ loop {realm::*}:
   if {_worlds::%loop-index%} is not true:
-   if {server::%loop-index%::loaded} is true:
+   if {realm::%loop-index%::loaded} is true:
     execute console command "mv unload s-%loop-index%-world"
     execute console command "mv unload s-%loop-index%-nether"
     execute console command "mv unload s-%loop-index%-end"
-    set {server::%loop-index%::loaded} to false
+    set {realm::%loop-index%::loaded} to false
+ wait 1 second
+ if {stopping} is set:
+  execute console command "minecraft:stop"
 
 on quit:
  set quit message to ""
@@ -532,11 +562,11 @@ on quit:
    set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
   if last 4 characters of "%{_world}%" is "-end":
    set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
-  set {server::%{_world}%::world::%player%} to "%world of player%"
-  set {_world} to "server-%{_world}%"
-  set {server::%{_world}%::location::x::%player%} to x-coordinate of player
-  set {server::%{_world}%::location::y::%player%} to y-coordinate of player
-  set {server::%{_world}%::location::z::%player%} to z-coordinate of player
+  set {realm::%{_world}%::world::%player%} to "%world of player%"
+  set {_world} to "realm-%{_world}%"
+  set {realm::%{_world}%::location::x::%player%} to x-coordinate of player
+  set {realm::%{_world}%::location::y::%player%} to y-coordinate of player
+  set {realm::%{_world}%::location::z::%player%} to z-coordinate of player
   loop all players:
    if world of loop-player is "s-%{_world}%-world", "s-%{_world}%-nether" or "s-%{_world}%-end":
     send "&e%player%&e has left the game" to loop-player
@@ -564,8 +594,10 @@ on death:
   if last 4 characters of "%{_world}%" is "-end":
    set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
   wait 1 tick
-  execute console command "mv tp %player% e:s-%{_world}%-world:%{server::%{_world}%::spawnpoint::x::%player%}%,%{server::%{_world}%::spawnpoint::y::%player%}%,%{server::%{_world}%::spawnpoint::z::%player%}%"
+  execute console command "mv tp %player% s-%{_world}%-world"
   execute console command "mvconfirm"
+  wait 1 tick
+  teleport player to location {realm::%{_world}%::spawnpoint::x::%player%}, {realm::%{_world}%::spawnpoint::y::%player%}, {realm::%{_world}%::spawnpoint::z::%player%}
 
 on death:
  force player to respawn
@@ -581,9 +613,9 @@ on rightclick:
   set {_world} to last length of "%world of player%" - 2 characters of "%world of player%"
   if last 6 characters of "%{_world}%" is "-world":
    set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
-   set {server::%{_world}%::spawnpoint::x::%player%} to x-coordinate of player
-   set {server::%{_world}%::spawnpoint::y::%player%} to y-coordinate of player
-   set {server::%{_world}%::spawnpoint::z::%player%} to z-coordinate of player
+   set {realm::%{_world}%::spawnpoint::x::%player%} to x-coordinate of player
+   set {realm::%{_world}%::spawnpoint::y::%player%} to y-coordinate of player
+   set {realm::%{_world}%::spawnpoint::z::%player%} to z-coordinate of player
    if time in world is not night:
     send "Respawn point set"
     cancel event
@@ -602,7 +634,7 @@ on rightclick on ender chest:
   cancel event
   open chest with 3 rows named "Ender Chest" to player
   wait 1 ticks
-  loop {server::%{_world}%::enderchest::%player%::*}:
+  loop {realm::%{_world}%::enderchest::%player%::*}:
    add loop-value to current inventory of player
   set {enderchest::%player%} to true
   
@@ -618,9 +650,9 @@ on inventory close:
     set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
    if last 4 characters of "%{_world}%" is "-end":
     set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
-   delete {server::%{_world}%::enderchest::%player%::*}
+   delete {realm::%{_world}%::enderchest::%player%::*}
    loop 27 times:
-    set {server::%{_world}%::enderchest::%player%::%loop-number - 1%} to slot "%loop-number - 1%" parsed as an integer of current inventory of player
+    set {realm::%{_world}%::enderchest::%player%::%loop-number - 1%} to slot "%loop-number - 1%" parsed as an integer of current inventory of player
    delete {enderchest::%player%}
 
 on load:
@@ -628,38 +660,38 @@ on load:
 
 # Modified PerWorldInventory Functions (https://www.spigotmc.org/resources/perworldinventory-api-no-more-bugs-of-inventories-for-skript-deployers-implement-in-yours-skripts.30492/)
 
-function saveinv(w: text , p: player):
+function saveinv(w: text, p: player):
  set {_count} to 0
  loop 36 times:
-  set {inv::%{_p}%::%{_count}%::main::%{_w}%} to slot {_count} of {_p}'s inventory
+  set {realm::%{_w}%::inv::%{_p}%::%{_count}%::main} to slot {_count} of {_p}'s inventory
   add 1 to {_count}
- set {inv::%{_p}%::helmet::main::%{_w}%} to {_p}'s helmet
- set {inv::%{_p}%::chest::main::%{_w}%} to {_p}'s chestplate
- set {inv::%{_p}%::legs::main::%{_w}%} to {_p}'s leggings
- set {inv::%{_p}%::feet::main::%{_w}%} to {_p}'s boots
- set {inv::%{_p}%::shield::main::%{_w}%} to {_p}'s shield
- set {health::%{_w}%::%{_p}%} to health of {_p}
- set {hunger::%{_w}%::%{_p}%} to food level of {_p}
- set {xp::%{_w}%::%{_p}%} to xp of {_p}
+ set {realm::%{_w}%::inv::%{_p}%::helmet::main} to {_p}'s helmet
+ set {realm::%{_w}%::inv::%{_p}%::chest::main} to {_p}'s chestplate
+ set {realm::%{_w}%::inv::%{_p}%::legs::main} to {_p}'s leggings
+ set {realm::%{_w}%::inv::%{_p}%::feet::main} to {_p}'s boots
+ set {realm::%{_w}%::inv::%{_p}%::shield::main} to {_p}'s shield
+ set {realm::%{_w}%::health::%{_p}%} to health of {_p}
+ set {realm::%{_w}%::hunger::%{_p}%} to food level of {_p}
+ set {realm::%{_w}%::xp::%{_p}%} to xp of {_p}
  if {_p} is on fire:
-  set {fire::%{_w}%::%{_p}%} to true
+  set {realm::%{_w}%::fire::%{_p}%} to true
  else:
-  set {fire::%{_w}%::%{_p}%} to false
+  set {realm::%{_w}%::fire::%{_p}%} to false
 
-function giveinv(w: text , p: player):
- execute console command "clear %{_p}%"
+function giveinv(w: text, p: player):
+ clear inventory of {_p}
  wait 1 tick
  set {_count} to 0
  loop 36 times:
-  set slot {_count} of {_p}'s inventory to {inv::%{_p}%::%{_count}%::main::%{_w}%}
+  set slot {_count} of {_p}'s inventory to {realm::%{_w}%::inv::%{_p}%::%{_count}%::main}
   add 1 to {_count}
- set the helmet of {_p} to {inv::%{_p}%::helmet::main::%{_w}%}
- set the chestplate of {_p} to {inv::%{_p}%::chest::main::%{_w}%}
- set the leggings of {_p} to {inv::%{_p}%::legs::main::%{_w}%}
- set the boots of {_p} to {inv::%{_p}%::feet::main::%{_w}%}
- set the shield of {_p} to {inv::%{_p}%::shield::main::%{_w}%}
- set {_p}'s health to {health::%{_w}%::%{_p}%}
- set {_p}'s food level to {hunger::%{_w}%::%{_p}%}
- set xp of {_p} to {xp::%{_w}%::%{_p}%}
- if {fire::%{_w}%::%{_p}%} is true:
+ set the helmet of {_p} to {realm::%{_w}%::inv::%{_p}%::helmet::main}
+ set the chestplate of {_p} to {realm::%{_w}%::inv::%{_p}%::chest::main}
+ set the leggings of {_p} to {realm::%{_w}%::inv::%{_p}%::legs::main}
+ set the boots of {_p} to {realm::%{_w}%::inv::%{_p}%::feet::main}
+ set the shield of {_p} to {realm::%{_w}%::inv::%{_p}%::shield::main}
+ set {_p}'s health to {realm::%{_w}%::health::%{_p}%}
+ set {_p}'s food level to {realm::%{_w}%::hunger::%{_p}%}
+ set xp of {_p} to {realm::%{_w}%::xp::%{_p}%}
+ if {realm::%{_w}%::fire::%{_p}%} is true:
   set {_p} on fire
