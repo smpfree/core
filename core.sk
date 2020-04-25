@@ -502,6 +502,8 @@ command /hub [<text>]:
      if world of loop-player is "s-%{_world}%-world", "s-%{_world}%-nether" or "s-%{_world}%-end":
       send "&e%player%&e has left the game" to loop-player
     set {_world} to "realm-%{_world}%"
+    loop 300 times:
+     send "" to player
     wait 1 tick
    else:
     set {_world} to "hub"
