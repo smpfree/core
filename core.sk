@@ -516,7 +516,7 @@ command /hub [<text>]:
    loop all players:
     if world of loop-player is "world":
      send "&e%player%&e has joined the game" to loop-player
-  teleport player to location -960, 4, 403
+  teleport player to location -961, 5, 408
   clear player's inventory
   remove fire from player
   heal the player
