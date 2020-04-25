@@ -1,8 +1,8 @@
-command /gamemode [<text>] [<offline player>]:
+command /gamemode [<text>] [<offline player>] [<text>]:
  trigger:
-  set {_s} to serverOfPlayer(player)
+  set {_s} to realmOfPlayer(player)
   if {_s} is not "hub":
-   if {server::%{_s}%::users::%player%} is "op":
+   if {realm::%{_s}%::users::%player%} is "op":
     if arg-1 is set:
      if arg-1 is "survival", "creative", "adventure", "spectator", "0", "1", "2", "3", "s", "c", "a" or "sp":
       if arg-1 is "survival", "0" or "s":
@@ -14,10 +14,13 @@ command /gamemode [<text>] [<offline player>]:
       if arg-1 is "spectator", "3" or "sp":
        set {_mode} to spectator
       if arg-2 is set:
+       if arg-3 is set:
+        send "&cThere should not be a third argument."
+        stop
        if arg-2 is offline:
         send "&cThe player must be online."
         stop
-       if "%serverOfPlayer(arg-2)%" is not "%{_s}%":
+       if realmOfPlayer(arg-2) is not "%{_s}%":
         send "&cThe player must be online."
         stop
        set {_p} to arg-2
@@ -37,7 +40,95 @@ command /gamemode [<text>] [<offline player>]:
    else:
     send "&cPlease use ""/minecraft:gamemode"" instead."
 
-function serverOfPlayer(p: player) :: string:
+command /clear [<player>] [<text>]:
+ trigger:
+  set {_s} to realmOfPlayer(player)
+  if {_s} is not "hub":
+   if {realm::%{_s}%::users::%player%} is "op":
+    if arg-1 is set:
+     if arg-1 is offline:
+      send "&cThe player must be online."
+      stop
+     if realmOfPlayer(arg-1) is not "%{_s}%":
+      send "&cThe player must be online."
+      stop
+     set {_p} to arg-1
+    else:
+     set {_p} to player
+    clear inventory of {_p}
+    send "&aSuccessfully cleared the inventory of %{_p}%."
+   else:
+    send "&cYou have no permission to this command."
+  else:
+   if player is not op:
+    send "&cYou have no permission to this command."
+   else:
+    send "&cPlease use ""/minecraft:clear"" instead."
+
+command /defaultgamemode [<text>] [<text>]:
+ trigger:
+  set {_s} to realmOfPlayer(player)
+  if {_s} is not "hub":
+   if {realm::%{_s}%::users::%player%} is "op":
+    if arg-1 is set:
+     if arg-1 is "survival", "creative", "adventure", "spectator", "0", "1", "2", "3", "s", "c", "a" or "sp":
+      if arg-1 is "creative", "1" or "c":
+       set {_mode} to creative
+      if arg-1 is "adventure", "2" or "a":
+       set {_mode} to adventure
+      if arg-1 is "spectator", "3" or "sp":
+       set {_mode} to spectator
+      if arg-2 is set:
+       send "&cThere should not be a second argument."
+       stop
+      if arg-1 is "survival", "0" or "s":
+       set {_mode} to survival
+       delete {realm::%{_s}%::defaultgamemode}
+      else:
+       set {realm::%{_s}%::defaultgamemode} to {_mode}
+      send "&aSuccessfully changed the default gamemode to %{_mode}%."
+     else:
+      send "&cThis gamemode does not exist. The list of gamemodes are ""survival"", ""creative"", ""adventure"" and ""spectator""."
+    else:
+     send "&cIncorrect usage. Please use ""/defaultgamemode <mode>"" instead."
+   else:
+    send "&cYou have no permission to this command."
+  else:
+   if player is not op:
+    send "&cYou have no permission to this command."
+   else:
+    send "&cPlease use ""/minecraft:defaultgamemode"" instead."
+
+command /gamerule [<text>] [<text>]:
+ trigger:
+  set {_s} to realmOfPlayer(player)
+  if {_s} is not "hub":
+   if {realm::%{_s}%::users::%player%} is "op":
+    if arg-1 is set:
+     if arg-1 is "announceAdvancements", "commandBlockOutput", "disableElytraMovementCheck", "doDaylightCycle", "doEntityDrops", "doFireTick", "doLimitedCrafting", "doMobLoot", "doMobSpawning", "doTileDrops", "doWeatherCycle", "keepInventory", "logAdminCommands", "maxCommandChainLength", "maxEntityCramming", "mobGriefing", "naturalRegeneration", "randomTickSpeed", "reducedDebugInfo", "sendCommandFeedback", "showDeathMessages", "spawnRadius" or "spectatorsGenerateChunks":
+      if arg-2 is set:
+       execute console command "mvgamerule %arg-1% %arg-2% s-%{_s}%-world"
+       execute console command "mvgamerule %arg-1% %arg-2% s-%{_s}%-world"
+       execute console command "mvgamerule %arg-1% %arg-2% s-%{_s}%-world"
+       send "&aSuccess! &fGamerule &b%arg-1% &fwas set to &a%arg-2%"
+      else:
+       send "&cYou must provide a second argument."
+     else:
+      send "&cFailure! &fGamerule &b%arg-1% &fcannot be set to &c%arg-2%"
+    else:
+     if player is not op:
+      set {oplimit::%player%} to "mvgamerules s-%{_s}%-world"
+      op the player
+     make player execute "mvgamerules s-%{_s}%-world"
+   else:
+    send "&cYou have no permission to this command."
+  else:
+   if player is not op:
+    send "&cYou have no permission to this command."
+   else:
+    send "&cPlease use ""/minecraft:gamerule"" instead."
+
+function realmOfPlayer(p: player) :: string:
  set {_worldname} to "%world of {_p}%"
  set {_worldcheck} to the first 2 characters of {_worldname}
  if {_worldcheck} is "s-":
