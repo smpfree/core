@@ -66,9 +66,10 @@ command /unsetclock [<text>]:
 on command:
  if executor is player:
   if player is not op:
-   if command is "help", "hub", "list", "create", "delete", "join", "invite", "setclock", "unsetclock", "gamemode", "clear", "defaultgamemode", "gamerule", "op" or "deop":
-    cancel event
-    send "&fUnknown command. Type ""/help"" for help."
+   if {cooldown::%player%} is not set:
+    if command is not "help", "hub", "list", "create", "delete", "join", "invite", "setclock", "unsetclock", "gamemode", "clear", "defaultgamemode", "gamerule", "op" or "deop":
+     cancel event
+     send "&fUnknown command. Type ""/help"" for help."
   else:
    if {oplimit::%player%} is set:
     if command is not {oplimit::%player%}:
