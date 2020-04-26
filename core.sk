@@ -445,6 +445,11 @@ command /join [<text>] [<text>]:
       else:
        set {_world} to "hub"
       saveinv("%{_world}%", player)
+      clear player's inventory
+      remove fire from player
+      heal the player
+      feed the player
+      set xp of player to 0
       if {realm::%arg-1%::loaded} is not true:
        execute console command "mv load s-%arg-1%-world"
        execute console command "mv load s-%arg-1%-nether"
@@ -454,11 +459,8 @@ command /join [<text>] [<text>]:
        set {realm::%arg-1%::world::%player%} to "s-%arg-1%-world"
       execute console command "mvconfirm"
       execute console command "mv tp %player% %{realm::%arg-1%::world::%player%}%"
-      wait 1 second
       set {kill::%player%} to true
-      wait 1 tick
       kill the player
-      wait 1 tick
       if {realm::%arg-1%::firstjoin::%player%} is not set:
        set {realm::%arg-1%::location::x::%player%} to x-coordinate of player
        set {realm::%arg-1%::location::y::%player%} to y-coordinate of player
@@ -466,16 +468,6 @@ command /join [<text>] [<text>]:
        set {realm::%arg-1%::spawnpoint::x::%player%} to x-coordinate of player
        set {realm::%arg-1%::spawnpoint::y::%player%} to y-coordinate of player
        set {realm::%arg-1%::spawnpoint::z::%player%} to z-coordinate of player
-       wait 1 second
-       clear player's inventory
-       wait 1 tick
-       remove fire from player
-       wait 1 tick
-       heal the player
-       wait 1 tick
-       feed the player
-       wait 1 tick
-       set xp of player to 0
        set {realm::%arg-1%::firstjoin::%player%} to true
       else:
        teleport player to location {realm::%arg-1%::location::x::%player%}, {realm::%arg-1%::location::y::%player%}, {realm::%arg-1%::location::z::%player%}
@@ -521,7 +513,6 @@ command /hub [<text>]:
     set {_world} to "realm-%{_world}%"
     loop 300 times:
      send "" to player
-    wait 1 tick
    else:
     set {_world} to "hub"
    saveinv("%{_world}%", player)
@@ -529,7 +520,6 @@ command /hub [<text>]:
    execute console command "mvconfirm"
    wait 1 tick
    giveinv("hub", player)
-   wait 1 tick
    loop all players:
     if world of loop-player is "world":
      send "&e%player%&e has joined the game" to loop-player
