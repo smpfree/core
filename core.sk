@@ -455,9 +455,11 @@ command /join [<text>] [<text>]:
       execute console command "mvconfirm"
       execute console command "mv tp %player% %{realm::%arg-1%::world::%player%}%"
       wait 1 second
+      set {kill::%player%} to true
+      wait 1 tick
+      kill the player
+      wait 1 tick
       if {realm::%arg-1%::firstjoin::%player%} is not set:
-       kill the player
-       wait 1 second
        set {realm::%arg-1%::location::x::%player%} to x-coordinate of player
        set {realm::%arg-1%::location::y::%player%} to y-coordinate of player
        set {realm::%arg-1%::location::z::%player%} to z-coordinate of player
@@ -616,7 +618,10 @@ on death:
   execute console command "mv tp %player% s-%{_world}%-world"
   execute console command "mvconfirm"
   wait 1 tick
-  teleport player to location {realm::%{_world}%::spawnpoint::x::%player%}, {realm::%{_world}%::spawnpoint::y::%player%}, {realm::%{_world}%::spawnpoint::z::%player%}
+  if {kill::%player%} is set:
+   teleport player to location {realm::%{_world}%::location::x::%player%}, {realm::%{_world}%::location::y::%player%}, {realm::%{_world}%::location::z::%player%}
+  else:
+   teleport player to location {realm::%{_world}%::spawnpoint::x::%player%}, {realm::%{_world}%::spawnpoint::y::%player%}, {realm::%{_world}%::spawnpoint::z::%player%}
 
 on death:
  force player to respawn
