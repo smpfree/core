@@ -221,7 +221,7 @@ command /kick [<text>] [<offline player>] [<text>]:
            set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
           if {_world} is arg-1:
            make arg-2 execute "hub"
-           send "&cYou have been kicked from the SMP realm you were just on."
+           send "&cYou have been kicked from the SMP realm you were just on." to arg-2
            stop
        else:
         send "&cThis player already does not have access to the SMP realm."
