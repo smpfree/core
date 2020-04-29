@@ -1,3 +1,59 @@
+command /setpro [<text>] [<text>]:
+ trigger:
+  if {proplan::%player%} is set:
+   if {proplan::%player%} is less than 1:
+    send "&cYou can purchase this command on the server store!"
+    delete {proplan::%player%}
+   else:
+    if arg-1 is set:
+     if arg-2 is set:
+      send "&cThere should not be a second argument."
+     else:
+      if {realm::%arg-1%} is set:
+       if {realm::%arg-1%::users::%player%} is set:
+        if {realm::%arg-1%} is "pro":
+         send "&cThis server already has the pro plan."
+        else:
+         send "&eYou have successfully set the realm to the pro plan for a month."
+         set {realm::%arg-1%} to "pro"
+         set {realm::%arg-1%::ranktime} to 2592000
+         remove 1 from {proplan::%player%}
+         if {proplan::%player%} is less than 1:
+          delete {proplan::%player%}
+       else:
+        send "&cYou have not been invited to this realm."
+      else:
+       send "&cThis realm does not exist."
+    else:
+     send "&cIncorrect usage. Please use ""/proplan <server name>"" instead."
+     send "&cKeep in mind you can set realms to the pro plan that you do not own but invited to."
+  else:
+   send "&cYou can purchase this command on the server store!"
+
+every 1 second:
+ loop {realm::*}:
+  if {realm::%loop-index%::ranktime} is set:
+   remove 1 from {realm::%loop-index%::ranktime}
+   if {realm::%loop-index%::ranktime} is less than 1:
+    delete {realm::%loop-index%::ranktime}
+
+command /givepro [<offline player>] [<text>]:
+ trigger:
+  if executor is console:
+   if arg-1 is set:
+    if arg-2 is set:
+     send "&cThe second argument should not be set."
+    else:
+     send "&eSuccessfully given %arg-1% a pro realm plan."
+     if {proplan::%arg-1%} is not set:
+      set {proplan::%arg-1%} to 1
+     else:
+      add 1 to {proplan::%arg-1%}
+   else:
+    send "&cIncorrect usage. Please use ""/givepro <player>"" instead."
+  else:
+   send "&cOnly the console can run this command."
+
 on any movement:
  entity is player
  world of player is "world"
@@ -312,6 +368,20 @@ command /setmaxrealms [<offline player>] [<text>] [<text>]:
   else:
    send "&cOnly the console can run this command."
 
+command /giverealm [<offline player>] [<text>]:
+ trigger:
+  if executor is console:
+   if arg-1 is set:
+    if arg-2 is set:
+     add 1 to {maxrealms::%arg-1%}
+     send "&eGave %arg-1% a realm."
+    else:
+     send "&cThere should not be a second argument."
+   else:
+    send "&cIncorrect usage. Please use ""/giverealm <player>"" instead."
+  else:
+   send "&cOnly the console can run this command."
+
 command /create [<text>] [<text>]:
  trigger:
   if {maxrealms::%player%} is not set:
@@ -344,7 +414,7 @@ command /create [<text>] [<text>]:
       if {realm::%loop-index%::owner} is player:
        add 1 to {_realms}
      if {_realms} is greater than {maxrealms::%player%}:
-      send "&cYou have reached the maximum amount of realms you can make. (%{maxrealms::%player%}%)"
+      send "&cYou have reached the maximum amount of realms you can make. (%{maxrealms::%player%}%&c)"
       stop
      else:
       send "&eYour private SMP realm is being created..."
@@ -366,6 +436,8 @@ command /create [<text>] [<text>]:
 
 command /delete [<text>] [<text>]:
  trigger:
+  send "&cThis experimental command has been disabled."
+  stop
   if arg-1 is not set:
    send "&cIncorrect usage. Please use ""/delete <realm name>"" instead."
    stop
@@ -480,6 +552,8 @@ command /join [<text>] [<text>]:
       execute console command "minecraft:effect clear %player%" # temp
       loop 300 times:
        send "" to player
+      if arg-1 is "skyblock": #testing
+       teleport player to location 0, 68, 0 #testing
       loop all players:
        if world of loop-player is "s-%arg-1%-world", "s-%arg-1%-nether" or "s-%arg-1%-end":
         send "&e%player%&e has joined the game" to loop-player
@@ -553,10 +627,11 @@ every 5 seconds:
  loop {realm::*}:
   if {_worlds::%loop-index%} is not true:
    if {realm::%loop-index%::loaded} is true:
-    execute console command "mv unload s-%loop-index%-world"
-    execute console command "mv unload s-%loop-index%-nether"
-    execute console command "mv unload s-%loop-index%-end"
-    set {realm::%loop-index%::loaded} to false
+    if {realm::%loop-index%} is "free":
+     execute console command "mv unload s-%loop-index%-world"
+     execute console command "mv unload s-%loop-index%-nether"
+     execute console command "mv unload s-%loop-index%-end"
+     set {realm::%loop-index%::loaded} to false
  wait 1 second
  if {stopping} is set:
   execute console command "minecraft:stop"
@@ -609,6 +684,9 @@ on death:
   execute console command "mv tp %player% s-%{_world}%-world"
   execute console command "mvconfirm"
   wait 1 tick
+  if {_world} is "skyblock": #testing
+   teleport player to location 0, 68, 0 #testing
+   stop #testing
   if {kill::%player%} is set:
    teleport player to location {realm::%{_world}%::location::x::%player%}, {realm::%{_world}%::location::y::%player%}, {realm::%{_world}%::location::z::%player%}
   else:
