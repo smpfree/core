@@ -15,3 +15,6 @@ Requires these plugins:
 
 Extra Plugins:
 - Latest [ViaVersion](https://www.spigotmc.org/resources/viaversion.19254/)
+
+# License
+This code is under a MIT license.
