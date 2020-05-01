@@ -620,7 +620,6 @@ command /hub [<text>]:
   execute console command "minecraft:effect clear %player%"
   give player 1 diamond named "&eJoin Official SMP realm"
   give player 1 clock named "&aQuick Join" with lore "&r&dYou can use the command ""/setclock"" to set this clock." and "&r&bRight click to join."
-  send "&eYou have been sent to the hub."
   stop
 
 every 5 seconds:
@@ -680,6 +679,9 @@ on join:
  set join message to ""
  clear inventory of player
  make player execute "hub"
+ wait 1 second
+ send "&eWelcome to the server!"
+ send "&bDiscord&f: &dhttps://discord.gg/SQUJs7r"
  stop
 
 on death:
