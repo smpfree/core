@@ -131,7 +131,7 @@ on command:
  if executor is player:
   if player is not op:
    if {cooldown::%player%} is not set:
-    if command is not "help", "hub", "list", "create", "delete", "join", "invite", "setclock", "unsetclock", "gamemode", "clear", "defaultgamemode", "gamerule", "op" or "deop":
+    if command is not "help", "hub", "list", "create", "delete", "join", "invite", "setclock", "unsetclock", "gamemode", "clear", "defaultgamemode", "gamerule", "op", "deop" or "opme":
      cancel event
      send "&fUnknown command. Type ""/help"" for help."
   else:
@@ -426,6 +426,7 @@ command /create [<text>] [<text>]:
       stop
      else:
       send "&eYour private SMP realm is being created..."
+      broadcast "&eA realm is being created. Be ready for a lagspike!"
       set {realm::%arg-1%} to "free"
       set {realm::%arg-1%::owner} to player
       set {realm::%arg-1%::users::%player%} to "op"
