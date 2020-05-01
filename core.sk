@@ -87,7 +87,11 @@ on rightclick:
  player is holding diamond
  name of player's held item is "&eJoin Official SMP Realm"
  cancel event
- make player execute "join official"
+ if {quick::%player%} is not set:
+  set {quick::%player%} to true
+  make player execute "join official"
+  wait 1 second
+  delete {quick::%player%}
 
 on rightclick:
  world of player is "world"
@@ -98,7 +102,11 @@ on rightclick:
   send "&cThis clock has not been set yet. You can set this clock using the command ""/setclock""."
   stop
  else:
-  make player execute "join %{hubclock::%player%}%"
+  if {quick::%player%} is not set:
+   set {quick::%player%} to true
+   make player execute "join %{hubclock::%player%}%"
+   wait 1 second
+   delete {quick::%player%}
 
 command /setclock [<text>] [<text>]:
  trigger:
@@ -502,10 +510,12 @@ command /join [<text>] [<text>]:
       set {_join} to true
      if {_join} is true:
       if {realm::%arg-1%::loaded} is not true:
+       wait 1 tick
        execute console command "mv load s-%arg-1%-world"
+       wait 1 tick
        execute console command "mv load s-%arg-1%-nether"
+       wait 1 tick
        execute console command "mv load s-%arg-1%-end"
-       set {realm::%arg-1%::loaded} to true
        wait 1 second
       loop all players:
        if world of loop-player is "world":
@@ -524,6 +534,7 @@ command /join [<text>] [<text>]:
       #else:
       # set {_world} to "hub"
       #saveinv("%{_world}%", player)
+      wait 1 tick
       clear player's inventory
       remove fire from player
       heal the player
@@ -533,8 +544,6 @@ command /join [<text>] [<text>]:
        set {realm::%arg-1%::world::%player%} to "s-%arg-1%-world"
       execute console command "mv tp %player% %{realm::%arg-1%::world::%player%}%"
       execute console command "mvconfirm"
-      set {kill::%player%} to true
-      kill the player
       if {realm::%arg-1%::firstjoin::%player%} is not set:
        set {realm::%arg-1%::location::x::%player%} to x-coordinate of player
        set {realm::%arg-1%::location::y::%player%} to y-coordinate of player
@@ -545,8 +554,9 @@ command /join [<text>] [<text>]:
        set {realm::%arg-1%::firstjoin::%player%} to true
       else:
        teleport player to location {realm::%arg-1%::location::x::%player%}, {realm::%arg-1%::location::y::%player%}, {realm::%arg-1%::location::z::%player%}
+       wait 3 second
        giveinv("realm-%arg-1%", player)
-       wait 1 tick
+       wait 1 second
       if {realm::%arg-1%::defaultgamemode} is set:
        set gamemode of player to {realm::%arg-1%::defaultgamemode}
       else:
@@ -554,11 +564,11 @@ command /join [<text>] [<text>]:
       execute console command "minecraft:effect clear %player%" # temp
       loop 300 times:
        send "" to player
-      if arg-1 is "skyblock": #testing
-       teleport player to location 0, 68, 0 #testing
       loop all players:
        if world of loop-player is "s-%arg-1%-world", "s-%arg-1%-nether" or "s-%arg-1%-end":
         send "&e%player%&e has joined the game" to loop-player
+      if {realm::%arg-1%::loaded} is not true:
+       set {realm::%arg-1%::loaded} to true
       stop
      else:
       send "&cYou have no permission to join this realm."
@@ -673,6 +683,7 @@ on join:
  stop
 
 on death:
+ force player to respawn
  set {_worldname} to "%world of player%"
  set {_worldcheck} to the first 2 characters of {_worldname}
  if {_worldcheck} is "s-":
@@ -687,16 +698,7 @@ on death:
   execute console command "mv tp %player% s-%{_world}%-world"
   execute console command "mvconfirm"
   wait 1 tick
-  if {_world} is "skyblock": #testing
-   teleport player to location 0, 68, 0 #testing
-   stop #testing
-  if {kill::%player%} is set:
-   teleport player to location {realm::%{_world}%::location::x::%player%}, {realm::%{_world}%::location::y::%player%}, {realm::%{_world}%::location::z::%player%}
-  else:
-   teleport player to location {realm::%{_world}%::spawnpoint::x::%player%}, {realm::%{_world}%::spawnpoint::y::%player%}, {realm::%{_world}%::spawnpoint::z::%player%}
-
-on death:
- force player to respawn
+  teleport player to location {realm::%{_world}%::spawnpoint::x::%player%}, {realm::%{_world}%::spawnpoint::y::%player%}, {realm::%{_world}%::spawnpoint::z::%player%}
 
 on rightclick:
  set {_eventblock} to "%event-block%"
@@ -759,7 +761,10 @@ on load:
 function saveinv(w: text, p: player):
  set {_count} to 0
  loop 36 times:
+  delete {realm::%{_w}%::inv::%{_p}%::%{_count}%::main}
   set {realm::%{_w}%::inv::%{_p}%::%{_count}%::main} to slot {_count} of {_p}'s inventory
+  if {realm::%{_w}%::inv::%{_p}%::%{_count}%::main} is not set:
+   set {realm::%{_w}%::inv::%{_p}%::%{_count}%::main} to air
   add 1 to {_count}
  set {realm::%{_w}%::inv::%{_p}%::helmet::main} to {_p}'s helmet
  set {realm::%{_w}%::inv::%{_p}%::chest::main} to {_p}'s chestplate
