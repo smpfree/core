@@ -123,11 +123,11 @@ command /clear [<player>] [<text>]:
      if realmOfPlayer(arg-1) is not "%{_s}%":
       send "&cThe player must be online."
       stop
-     set {_p} to arg-1
+     clear inventory of arg-1
+     send "&aSuccessfully cleared the inventory of %arg-1%."
     else:
-     set {_p} to player
-    clear inventory of {_p}
-    send "&aSuccessfully cleared the inventory of %{_p}%."
+     clear inventory of player
+     send "&aSuccessfully cleared your inventory."
    else:
     send "&cYou have no permission to this command."
   else:
@@ -198,6 +198,52 @@ command /gamerule [<text>] [<text>]:
     send "&cYou have no permission to this command."
    else:
     send "&cPlease use ""/minecraft:gamerule"" instead."
+
+command /weather [<text>]:
+ trigger:
+  send "&cThis command is currently broken for an unknown reason and is disabled."
+  stop
+  set {_s} to realmOfPlayer(player)
+  if {_s} is not "hub":
+   if {realm::%{_s}%::users::%player%} is "op":
+    if arg-1 is "clear", "rain" or "thunder":
+     if arg-1 is "clear":
+      set weather in player's world to clear
+     if arg-1 is "rain":
+      set weather in player's world to rain
+     if arg-1 is "thunder":
+      set weather in player's world to thunder
+     send "&eYou have successfully changed the player's weather."
+    else:
+     send "&cIncorrect usage. Please use ""/weather <clear/rain/thunder>"" instead."
+   else:
+    send "&cYou have no permission to this command."
+  else:
+   if player is not op:
+    send "&cYou have no permission to this command."
+   else:
+    send "&cPlease use ""/minecraft:weather"" instead."
+
+command /difficulty [<text>]:
+ trigger:
+  set {_s} to realmOfPlayer(player)
+  if {_s} is not "hub":
+   if {realm::%{_s}%::users::%player%} is "op":
+    if arg-1 is "easy", "hard", "normal" or "peaceful":
+     execute console command "mvm set difficulty %arg-1% s-%{_s}%-world"
+     execute console command "mvm set difficulty %arg-1% s-%{_s}%-nether"
+     execute console command "mvm set difficulty %arg-1% s-%{_s}%-end"
+     send "&eYou have successfully changed the realm's difficulty."
+    else:
+     send "&cIncorrect usage. Please use ""/difficulty <easy/hard/normal/peaceful>"" instead."
+   else:
+    send "&cYou have no permission to this command."
+  else:
+   if player is not op:
+    send "&cYou have no permission to this command."
+   else:
+    send "&cPlease use ""/minecraft:difficulty"" instead."
+
 
 function realmOfPlayer(p: player) :: string:
  set {_worldname} to "%world of {_p}%"
