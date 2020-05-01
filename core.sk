@@ -501,37 +501,38 @@ command /join [<text>] [<text>]:
      if arg-1 is "official":
       set {_join} to true
      if {_join} is true:
-      loop all players:
-       if world of loop-player is "world":
-        send "&e%player%&e has left the game" to loop-player
-      set {_worldname} to "%world of player%"
-      set {_worldcheck} to the first 2 characters of {_worldname}
-      if {_worldcheck} is "s-":
-       set {_world} to last length of "%world of player%" - 2 characters of "%world of player%"
-       if last 6 characters of "%{_world}%" is "-world":
-        set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
-       if last 7 characters of "%{_world}%" is "-nether":
-        set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
-       if last 4 characters of "%{_world}%" is "-end":
-        set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
-       set {_world} to "realm-%{_world}%"
-      else:
-       set {_world} to "hub"
-      saveinv("%{_world}%", player)
-      clear player's inventory
-      remove fire from player
-      heal the player
-      feed the player
-      set xp of player to 0
       if {realm::%arg-1%::loaded} is not true:
        execute console command "mv load s-%arg-1%-world"
        execute console command "mv load s-%arg-1%-nether"
        execute console command "mv load s-%arg-1%-end"
        set {realm::%arg-1%::loaded} to true
+       wait 1 second
+      loop all players:
+       if world of loop-player is "world":
+        send "&e%player%&e has left the game" to loop-player
+      #set {_worldname} to "%world of player%"
+      #set {_worldcheck} to the first 2 characters of {_worldname}
+      #if {_worldcheck} is "s-":
+      # set {_world} to last length of "%world of player%" - 2 characters of "%world of player%"
+      # if last 6 characters of "%{_world}%" is "-world":
+      #  set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
+      # if last 7 characters of "%{_world}%" is "-nether":
+      #  set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
+      # if last 4 characters of "%{_world}%" is "-end":
+      #  set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
+      # set {_world} to "realm-%{_world}%"
+      #else:
+      # set {_world} to "hub"
+      #saveinv("%{_world}%", player)
+      clear player's inventory
+      remove fire from player
+      heal the player
+      feed the player
+      set xp of player to 0
       if {realm::%arg-1%::firstjoin::%player%} is not set:
        set {realm::%arg-1%::world::%player%} to "s-%arg-1%-world"
-      execute console command "mvconfirm"
       execute console command "mv tp %player% %{realm::%arg-1%::world::%player%}%"
+      execute console command "mvconfirm"
       set {kill::%player%} to true
       kill the player
       if {realm::%arg-1%::firstjoin::%player%} is not set:
@@ -545,6 +546,7 @@ command /join [<text>] [<text>]:
       else:
        teleport player to location {realm::%arg-1%::location::x::%player%}, {realm::%arg-1%::location::y::%player%}, {realm::%arg-1%::location::z::%player%}
        giveinv("realm-%arg-1%", player)
+       wait 1 tick
       if {realm::%arg-1%::defaultgamemode} is set:
        set gamemode of player to {realm::%arg-1%::defaultgamemode}
       else:
@@ -595,6 +597,7 @@ command /hub [<text>]:
    execute console command "mvconfirm"
    wait 1 tick
    giveinv("hub", player)
+   wait 1 tick
    loop all players:
     if world of loop-player is "world":
      send "&e%player%&e has joined the game" to loop-player
@@ -656,12 +659,12 @@ on quit:
   loop all players:
    if world of loop-player is "s-%{_world}%-world", "s-%{_world}%-nether" or "s-%{_world}%-end":
     send "&e%player%&e has left the game" to loop-player
+  saveinv("%{_world}%", player)
  else:
   set {_world} to "hub"
   loop all players:
    if world of loop-player is "world":
     send "&e%player%&e has left the game" to loop-player
- saveinv("%{_world}%", player)
 
 on join:
  set join message to ""
@@ -773,7 +776,7 @@ function saveinv(w: text, p: player):
 
 function giveinv(w: text, p: player):
  clear inventory of {_p}
- wait 1 tick
+ wait 1 second
  set {_count} to 0
  loop 36 times:
   set slot {_count} of {_p}'s inventory to {realm::%{_w}%::inv::%{_p}%::%{_count}%::main}
