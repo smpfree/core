@@ -199,21 +199,14 @@ command /gamerule [<text>] [<text>]:
    else:
     send "&cPlease use ""/minecraft:gamerule"" instead."
 
-command /weather [<text>]:
+command /weather [<weather>]:
  trigger:
-  send "&cThis command is currently broken for an unknown reason and is disabled."
-  stop
   set {_s} to realmOfPlayer(player)
   if {_s} is not "hub":
    if {realm::%{_s}%::users::%player%} is "op":
-    if arg-1 is "clear", "rain" or "thunder":
-     if arg-1 is "clear":
-      set weather in player's world to clear
-     if arg-1 is "rain":
-      set weather in player's world to rain
-     if arg-1 is "thunder":
-      set weather in player's world to thunder
-     send "&eYou have successfully changed the player's weather."
+    if arg-1 is clear, rain or thunder:
+     set weather in player's world to arg-1
+     send "&eYou have successfully changed the weather."
     else:
      send "&cIncorrect usage. Please use ""/weather <clear/rain/thunder>"" instead."
    else:
@@ -244,6 +237,140 @@ command /difficulty [<text>]:
    else:
     send "&cPlease use ""/minecraft:difficulty"" instead."
 
+command /tp [<player>] [<player>] [<text>]:
+ trigger:
+  set {_s} to realmOfPlayer(player)
+  if {_s} is not "hub":
+   if {realm::%{_s}%::users::%player%} is "op":
+    if arg-1 is set:
+     if arg-1 is offline:
+      send "&c%arg-1% must be online."
+      stop
+     if realmOfPlayer(arg-1) is not "%{_s}%":
+      send "&c%arg-1% must be online."
+      stop
+     if arg-2 is set:
+      if arg-2 is offline:
+       send "&c%arg-2% must be online."
+       stop
+      if realmOfPlayer(arg-2) is not "%{_s}%":
+       send "&c%arg-2% must be online."
+       stop
+      teleport arg-1 to arg-2
+     else:
+      teleport player to arg-1
+     send "&eSuccessfully teleported the player!"
+    else:
+     send "&cIncorrect usage. Please use ""/tp <player> [player]"" instead."
+   else:
+    send "&cYou have no permission to this command."
+  else:
+   if player is not op:
+    send "&cYou have no permission to this command."
+   else:
+    send "&cPlease use ""/minecraft:tp"" instead."
+
+command /time [<text>] [<text>]:
+ trigger:
+  set {_s} to realmOfPlayer(player)
+  if {_s} is not "hub":
+   if {realm::%{_s}%::users::%player%} is "op":
+    if arg-1 is set:
+     if arg-2 is set:
+      send "&cThere should not be a second argument."
+     else:
+      if arg-1 is "day", "midnight", "night" or "noon":
+       if arg-1 is "day":
+        set time to 06:00
+       if arg-1 is "midnight":
+        set time to 24:00
+       if arg-1 is "night":
+        set time to 19:00
+       if arg-1 is "noon":
+        set time to 12:00
+       send "&eYou have successfully changed the time."
+      else:
+       send "&cIncorrect usage. Please use ""/time <day/midnight/night/noon>"" instead."
+    else:
+     send "&cIncorrect usage. Please use ""/time <day/midnight/night/noon>"" instead."
+   else:
+    send "&cYou have no permission to this command."
+  else:
+   if player is not op:
+    send "&cYou have no permission to this command."
+   else:
+    send "&cPlease use ""/minecraft:time"" instead."
+
+command /summon [<entity type>]:
+ trigger:
+  set {_s} to realmOfPlayer(player)
+  if {_s} is not "hub":
+   if {realm::%{_s}%::users::%player%} is "op":
+    if arg-1 is set:
+     spawn arg-1 at player
+     send "&eThe entity has been summoned."
+    else:
+     send "&cIncorrect usage. Please use ""/summon <entity>""."
+  else:
+   if player is not op:
+    send "&cYou have no permission to this command."
+   else:
+    send "&cPlease use ""/minecraft:summon"" instead."
+
+command /xp [<text>] [<offline player>] [<text>] [<text>]:
+ trigger:
+  set {_s} to realmOfPlayer(player)
+  if {_s} is not "hub":
+   if {realm::%{_s}%::users::%player%} is "op":
+    if arg-1 is set:
+     if arg-1 is "add", "query" or "set":
+      if arg-2 is set:
+       if arg-2 is offline:
+        send "&c%arg-2%&c must be online."
+        stop
+       if realmOfPlayer(arg-2) is not "%{_s}%":
+        send "&c%arg-2%&c must be online."
+        stop
+       if arg-3 is set:
+        if arg-1 is "query":
+         if arg-3 is "levels" or "points":
+          if player is not op:
+           set {oplimit::%player%} to "minecraft:xp %arg-1% %arg-2% %arg-3%"
+           op the player
+          make player execute "minecraft:xp %arg-1% %arg-2% %arg-3%"
+         else:
+          send "&cIncorrect usage. Please use ""/xp %arg-1%&c %arg-2%&c <levels/points>"" instead."
+        else:
+         if arg-3 parsed as integer is set:
+          if arg-4 is set:
+           if arg-4 is "levels" or "points":
+            if player is not op:
+             set {oplimit::%player%} to "minecraft:xp %arg-1% %arg-2% %arg-3% %arg-4%"
+             op the player
+            make player execute "minecraft:xp %arg-1% %arg-2% %arg-3% %arg-4%"
+          else:
+           send "&cIncorrect usage. Please use ""/xp %arg-1%&c %arg-2%&c %arg-3%&c <levels/points>"" instead."
+         else:
+          send "&cPlease provide a number for the third argument."
+       else:
+        if arg-1 is "query":
+         send "&cIncorrect usage. Please use ""/xp %arg-1%&c %arg-2%&c <levels/points>"" instead."
+        else:
+         send "&cIncorrect usage. Please use ""/xp %arg-1%&c %arg-2%&c [amount] <levels/points>"" instead."
+      else:
+       if arg-1 is "query":
+        send "&cIncorrect usage. Please use ""/xp %arg-1%&c <player> <levels/points>"" instead."
+       else:
+        send "&cIncorrect usage. Please use ""/xp %arg-1%&c <player> [amount] <levels/points>"" instead."
+     else:
+      send "&cIncorrect usage. Please use ""/xp <add/query/set> <player> [amount] <levels/points>"" instead."
+    else:
+     send "&cIncorrect usage. Please use ""/xp <add/query/set> <player> [amount] <levels/points>"" instead."
+  else:
+   if player is not op:
+    send "&cYou have no permission to this command."
+   else:
+    send "&cPlease use ""/minecraft:xp"" instead."
 
 function realmOfPlayer(p: player) :: string:
  set {_worldname} to "%world of {_p}%"
