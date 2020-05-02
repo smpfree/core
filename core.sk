@@ -79,7 +79,7 @@ on drop:
   cancel event
 
 on damage:
- if world of attacker is "world":
+ if world of victim is "world":
   cancel event
 
 on rightclick:
@@ -129,6 +129,9 @@ command /unsetclock [<text>]:
 
 on command:
  if executor is player:
+  if {nomove::%player%} is set:
+   send "&cYou must move at least once right after you join in order to run a command."
+   stop
   if player is not op:
    if {cooldown::%player%} is not set:
     if command is not "help", "hub", "list", "create", "delete", "join", "invite", "setclock", "unsetclock", "gamemode", "clear", "defaultgamemode", "gamerule", "op", "deop" or "opme":
@@ -213,6 +216,11 @@ command /help [<text>]:
     send "&b/clear &f- &eClear the inventory of a player."
     send "&b/defaultgamemode &f- &eSet the default gamemode of the SMP realm."
     send "&b/gamerule &f- &eManage the gamerules of the SMP realm."
+    send "&b/difficulty &f- &eChange the realm's difficulty."
+    send "&b/tp &f- &eTeleport to a location."
+    send "&b/weather &f- &eChange the weather of a world."
+    send "&b/time &f- &eChange the time of a world."
+    send "&b/xp &f- &eManage player's experience points."
    send "&a----------------"
 
 command /list [<text>]:
@@ -531,7 +539,6 @@ command /join [<text>] [<text>]:
       #  set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
       # if last 4 characters of "%{_world}%" is "-end":
       #  set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
-      # set {_world} to "realm-%{_world}%"
       #else:
       # set {_world} to "hub"
       #saveinv("%{_world}%", player)
@@ -555,8 +562,8 @@ command /join [<text>] [<text>]:
        set {realm::%arg-1%::firstjoin::%player%} to true
       else:
        teleport player to location {realm::%arg-1%::location::x::%player%}, {realm::%arg-1%::location::y::%player%}, {realm::%arg-1%::location::z::%player%}
-       wait 3 second
-       giveinv("realm-%arg-1%", player)
+       wait 1 tick
+       giveinv("%arg-1%", player)
        wait 1 second
       if {realm::%arg-1%::defaultgamemode} is set:
        set gamemode of player to {realm::%arg-1%::defaultgamemode}
@@ -598,7 +605,7 @@ command /hub [<text>]:
     loop all players:
      if world of loop-player is "s-%{_world}%-world", "s-%{_world}%-nether" or "s-%{_world}%-end":
       send "&e%player%&e has left the game" to loop-player
-    set {_world} to "realm-%{_world}%"
+    set {_world} to "%{_world}%"
     loop 300 times:
      send "" to player
    else:
@@ -662,7 +669,6 @@ on quit:
   if last 4 characters of "%{_world}%" is "-end":
    set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
   set {realm::%{_world}%::world::%player%} to "%world of player%"
-  set {_world} to "realm-%{_world}%"
   set {realm::%{_world}%::location::x::%player%} to x-coordinate of player
   set {realm::%{_world}%::location::y::%player%} to y-coordinate of player
   set {realm::%{_world}%::location::z::%player%} to z-coordinate of player
@@ -678,12 +684,17 @@ on quit:
 
 on join:
  set join message to ""
- clear inventory of player
  make player execute "hub"
+ set {nomove::%player%} to true
  wait 1 second
  send "&eWelcome to the server!"
  send "&bDiscord&f: &dhttps://discord.gg/SQUJs7r"
  stop
+
+on any movement:
+ entity is player
+ if {nomove::%player%} is set:
+  delete {nomove::%player%}
 
 on death:
  force player to respawn
@@ -766,6 +777,9 @@ function saveinv(w: text, p: player):
  loop 36 times:
   delete {realm::%{_w}%::inv::%{_p}%::%{_count}%::main}
   set {realm::%{_w}%::inv::%{_p}%::%{_count}%::main} to slot {_count} of {_p}'s inventory
+  if {realm::%{_w}%::inv::%{_p}%::%{_count}%::main} is set:
+   if {realm::%{_w}%::inv::%{_p}%::%{_count}%::main} is not air:
+    send "%{_count}%: %{realm::%{_w}%::inv::%{_p}%::%{_count}%::main}%" to console
   if {realm::%{_w}%::inv::%{_p}%::%{_count}%::main} is not set:
    set {realm::%{_w}%::inv::%{_p}%::%{_count}%::main} to air
   add 1 to {_count}
@@ -788,6 +802,9 @@ function giveinv(w: text, p: player):
  set {_count} to 0
  loop 36 times:
   set slot {_count} of {_p}'s inventory to {realm::%{_w}%::inv::%{_p}%::%{_count}%::main}
+  if {realm::%{_w}%::inv::%{_p}%::%{_count}%::main} is set:
+   if {realm::%{_w}%::inv::%{_p}%::%{_count}%::main} is not air:
+    send "%{_count}%: %{realm::%{_w}%::inv::%{_p}%::%{_count}%::main}%" to console
   add 1 to {_count}
  set the helmet of {_p} to {realm::%{_w}%::inv::%{_p}%::helmet::main}
  set the chestplate of {_p} to {realm::%{_w}%::inv::%{_p}%::chest::main}
