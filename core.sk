@@ -640,6 +640,8 @@ command /join [<text>] [<text>]:
       # set {_world} to "hub"
       #saveinv("%{_world}%", player)
       wait 1 tick
+      loop 300 times:
+       send "" to player
       clear player's inventory
       remove fire from player
       heal the player
@@ -667,8 +669,6 @@ command /join [<text>] [<text>]:
       else:
        set gamemode of player to survival
       execute console command "minecraft:effect clear %player%" # temp
-      loop 300 times:
-       send "" to player
       loop all players:
        if world of loop-player is "s-%arg-1%-world", "s-%arg-1%-nether" or "s-%arg-1%-end":
         send "&e%player%&e has joined the game" to loop-player
