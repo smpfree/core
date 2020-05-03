@@ -372,6 +372,126 @@ command /xp [<text>] [<offline player>] [<text>] [<text>]:
    else:
     send "&cPlease use ""/minecraft:xp"" instead."
 
+command /effect [<text>] [<offline player>] [<text>]:
+ trigger:
+  set {_s} to realmOfPlayer(player)
+  if {_s} is not "hub":
+   if {realm::%{_s}%::users::%player%} is "op":
+    if arg-1 is set:
+     if arg-1 is "give" or "clear":
+      if arg-2 is set:
+       if arg-2 is offline:
+        send "&cThe player must be online."
+       else:
+        if realmOfPlayer(arg-2) is not "%{_s}%":
+         send "&cThe player must be online."
+         stop
+        if player is not op:
+         if arg-3 is set:
+          set {oplimit::%player%} to "minecraft:effect %arg-1% %arg-2% %arg-3%"
+         else:
+          set {oplimit::%player%} to "minecraft:effect %arg-1% %arg-2%"
+         op the player
+        if arg-3 is set:
+         make player execute "minecraft:effect %arg-1% %arg-2% %arg-3%"
+        else:
+         make player execute "minecraft:effect %arg-1% %arg-2%"
+      else:
+       send "&cIncorrect usage. Please use ""/effect <give/clear> <player> <effect> [time] [level] [true/false]"" instead."
+     else:
+      send "&cIncorrect usage. Please use ""/effect <give/clear> <player> <effect> [time] [level] [true/false]"" instead."
+    else:
+     send "&cIncorrect usage. Please use ""/effect <give/clear> <player> <effect> [time] [level] [true/false]"" instead."
+   else:
+    send "&cYou have no permission to this command."
+  else:
+   if player is not op:
+    send "&cYou have no permission to this command."
+   else:
+    send "&cPlease use ""/minecraft:effect"" instead."
+
+command /enchant [<player>] [<text>]:
+ trigger:
+  set {_s} to realmOfPlayer(player)
+  if {_s} is not "hub":
+   if {realm::%{_s}%::users::%player%} is "op":
+    if arg-1 is set:
+     if arg-1 is offline:
+      send "&cThe player must be online."
+      stop
+     if realmOfPlayer(arg-1) is not "%{_s}%":
+      send "&cThe player must be online."
+      stop
+     if arg-2 is set:
+      if player is not op:
+       set {oplimit::%player%} to "minecraft:enchant %arg-1% %arg-2%"
+       op the player
+      make player execute "minecraft:enchant %arg-1% %arg-2%"
+     else:
+      send "&cIncorrect usage. Please use ""/enchant %arg-1%&c <enchantment> [level]"" instead."
+    else:
+     send "&cIncorrect usage. Please use ""/enchant <player> <enchantment> [level]"" instead."
+   else:
+    send "&cYou have no permission to this command."
+  else:
+   if player is not op:
+    send "&cYou have no permission to this command."
+   else:
+    send "&cPlease use ""/minecraft:enchant"" instead."
+
+command /kill [<player>] [<text>]:
+ trigger:
+  set {_s} to realmOfPlayer(player)
+  if {_s} is not "hub":
+   if {realm::%{_s}%::users::%player%} is "op":
+    if arg-1 is set:
+     if arg-1 is offline:
+      send "&cThe player must be online."
+      stop
+     if realmOfPlayer(arg-1) is not "%{_s}%":
+      send "&cThe player must be online."
+      stop
+     kill arg-1
+     send "&aSuccessfully killed %arg-1%."
+    else:
+     send "&cIncorrect usage. Please use ""/kill <player>"" instead."
+   else:
+    send "&cYou have no permission to this command."
+  else:
+   if player is not op:
+    send "&cYou have no permission to this command."
+   else:
+    send "&cPlease use ""/minecraft:kill"" instead."
+
+command /give [<player>] [<text>]:
+ trigger:
+  set {_s} to realmOfPlayer(player)
+  if {_s} is not "hub":
+   if {realm::%{_s}%::users::%player%} is "op":
+    if arg-1 is set:
+     if arg-1 is offline:
+      send "&cThe player must be online."
+      stop
+     if realmOfPlayer(arg-1) is not "%{_s}%":
+      send "&cThe player must be online."
+      stop
+     if arg-2 is set:
+      if player is not op:
+       set {oplimit::%player%} to "minecraft:give %arg-1% %arg-2%"
+       op the player
+      make player execute "minecraft:give %arg-1% %arg-2%"
+     else:
+      send "&cIncorrect usage. Please use ""/give %arg-1%&c <item> [count]"" instead."
+    else:
+     send "&cIncorrect usage. Please use ""/give <player> <item> [count]"" instead."
+   else:
+    send "&cYou have no permission to this command."
+  else:
+   if player is not op:
+    send "&cYou have no permission to this command."
+   else:
+    send "&cPlease use ""/minecraft:give"" instead."
+
 function realmOfPlayer(p: player) :: string:
  set {_worldname} to "%world of {_p}%"
  set {_worldcheck} to the first 2 characters of {_worldname}
