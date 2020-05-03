@@ -483,7 +483,7 @@ command /create [<text>] [<text>]:
      loop {realm::*}:
       if {realm::%loop-index%::owner} is player:
        add 1 to {_realms}
-     if {_realms} is greater than {maxrealms::%player%}:
+     if {_realms} is greater than {maxrealms::%player%} - 1:
       send "&cYou have reached the maximum amount of realms you can make. (%{maxrealms::%player%}%&c)"
       stop
      else:
@@ -563,7 +563,6 @@ command /plan [<text>] [<text>]:
      if {realm::%arg-1%::users::%player%} is set:
       if {realm::%arg-1%::ranktime} is set:
        set {_seconds} to {realm::%arg-1%::ranktime}
-       send "%{_seconds}%"
        set {_day} to 0
        set {_hour} to 0
        set {_minutes} to 0
