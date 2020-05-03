@@ -135,14 +135,15 @@ on command:
    stop
   if player is not op:
    if {cooldown::%player%} is not set:
-    if world of player is "world":
-     if command is not "help", "hub", "list", "create", "delete", "join", "setclock", "unsetclock", "transfer", "plan" or "opme":
-      cancel event
-      send "&fUnknown command. Type ""/help"" for help."
-    else:
-     if command is not "help", "hub", "gamemode", "clear", "defaultgamemode", "gamerule", "difficulty", "tp", "weather", "time", "xp", "effect", "enchant", "kill" or "give":
-      cancel event
-      send "&fUnknown command. Type ""/help"" for help."
+    if {runcmd::%player%} is set:
+     if world of player is "world":
+      if command is not "help", "hub", "list", "create", "delete", "join", "setclock", "unsetclock", "transfer", "plan" or "opme":
+       cancel event
+       send "&fUnknown command. Type ""/help"" for help."
+     else:
+      if command is not "help", "hub", "gamemode", "clear", "defaultgamemode", "gamerule", "difficulty", "tp", "weather", "time", "xp", "effect", "enchant", "kill" or "give":
+       cancel event
+       send "&fUnknown command. Type ""/help"" for help."
   else:
    if {oplimit::%player%} is set:
     if command is not {oplimit::%player%}:
@@ -167,16 +168,24 @@ on command:
 on command:
  if executor is player:
   if player is not op:
-   if {cooldown::%player%} is not set:
+   if {cooldown::%player%} is set:
+    if {runcmd::%player%} is set:
+     delete {runcmd::%player%}
+    else:
+     if command is not "hub":
+      cancel event
+      send "&cWait %{cooldown::%player%}% seconds before running another command."
+   else:
+    cancel event
+    set {cooldown::%player%} to 3
+    wait 1 second
+    set {runcmd::%player%} to "%full command%"
+    make player execute "%full command%"
     set {cooldown::%player%} to 2
     wait 1 second
     set {cooldown::%player%} to 1
     wait 1 second
     delete {cooldown::%player%}
-   else:
-    if command is not "hub":
-     cancel event
-     send "&cWait %{cooldown::%player%}% seconds before running another command."
 
 on join:
  if {stopping} is set:
