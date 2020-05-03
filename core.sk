@@ -134,16 +134,15 @@ on command:
    send "&cYou must move at least once right after you join in order to run a command."
    stop
   if player is not op:
-   if {cooldown::%player%} is not set:
-    if {runcmd::%player%} is set:
-     if world of player is "world":
-      if command is not "help", "hub", "list", "create", "delete", "join", "setclock", "unsetclock", "transfer", "plan" or "opme":
-       cancel event
-       send "&fUnknown command. Type ""/help"" for help."
-     else:
-      if command is not "help", "hub", "gamemode", "clear", "defaultgamemode", "gamerule", "difficulty", "tp", "weather", "time", "xp", "effect", "enchant", "kill" or "give":
-       cancel event
-       send "&fUnknown command. Type ""/help"" for help."
+   if {runcmd::%player%} is set:
+    if world of player is "world":
+     if command is not "help", "hub", "list", "create", "delete", "join", "setclock", "unsetclock", "transfer", "plan" or "opme":
+      cancel event
+      send "&fUnknown command. Type ""/help"" for help."
+    else:
+     if command is not "help", "hub", "gamemode", "clear", "defaultgamemode", "gamerule", "difficulty", "tp", "weather", "time", "xp", "effect", "enchant", "kill" or "give":
+      cancel event
+      send "&fUnknown command. Type ""/help"" for help."
   else:
    if {oplimit::%player%} is set:
     if command is not {oplimit::%player%}:
