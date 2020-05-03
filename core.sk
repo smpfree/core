@@ -130,13 +130,19 @@ command /unsetclock [<text>]:
 on command:
  if executor is player:
   if {nomove::%player%} is set:
+   cancel event
    send "&cYou must move at least once right after you join in order to run a command."
    stop
   if player is not op:
    if {cooldown::%player%} is not set:
-    if command is not "help", "hub", "list", "create", "delete", "join", "invite", "setclock", "unsetclock", "gamemode", "clear", "defaultgamemode", "gamerule", "op", "deop" or "opme":
-     cancel event
-     send "&fUnknown command. Type ""/help"" for help."
+    if world of player is "world":
+     if command is not "help", "hub", "list", "create", "delete", "join", "setclock", "unsetclock", "transfer", "plan" or "opme":
+      cancel event
+      send "&fUnknown command. Type ""/help"" for help."
+    else:
+     if command is not "help", "hub", "gamemode", "clear", "defaultgamemode", "gamerule", "difficulty", "tp", "weather", "time", "xp", "effect", "enchant", "kill" or "give":
+      cancel event
+      send "&fUnknown command. Type ""/help"" for help."
   else:
    if {oplimit::%player%} is set:
     if command is not {oplimit::%player%}:
@@ -179,6 +185,7 @@ on join:
 on load:
  delete {stopping}
  delete {cooldown::*}
+ delete {oplimit::*}
 
 on rightclick on sign:
  if world of player is not "world":
@@ -196,6 +203,8 @@ command /help [<text>]:
    send "&b/join &f- &eJoin a SMP realm."
    send "&b/setclock &f- &eSet the quick join clock at the hub."
    send "&b/unsetclock &f- &eUnset the quick join clock at the hub."
+   send "&b/transfer &f- &eTransfer your realm ownership."
+   send "&b/plan &f- &eCheck what plan a realm has and how much more time the plan will last."
    send "&a----------------"
   else:
    set {_worldname} to "%world of player%"
@@ -221,6 +230,10 @@ command /help [<text>]:
     send "&b/weather &f- &eChange the weather of a world."
     send "&b/time &f- &eChange the time of a world."
     send "&b/xp &f- &eManage player's experience points."
+    send "&b/effect &f- &eGive a player a potion effect."
+    send "&b/enchant &f- &eEnchant a item a player is holding."
+    send "&b/kill &f- &eKill a player."
+    send "&b/give &f- &eGive an item to a player."
    send "&a----------------"
 
 command /list [<text>]:
@@ -265,6 +278,47 @@ command /invite [<text>] [<offline player>] [<text>]:
        send "&cA SMP realm with this name does not exist."
   else:
    send "&cIncorrect usage. Please use ""/invite <realm> <player>"" instead."
+
+command /transfer [<text>] [<offline player>] [<text>]:
+ trigger:
+  if arg-2 is set:
+   if arg-3 is set:
+    send "&cThis command should not have a third argument."
+   else:
+    if arg-2 is offline:
+     send "&cYou can only invite players that are online."
+    else:
+     if arg-2 is player:
+      send "&cYou cannot transfer ownership to yourself."
+     else:
+      if {realm::%arg-1%} is set:
+       if {realm::%arg-1%::owner} is player:
+        if {realm::%arg-1%::users::%arg-2%} is set:
+         if {maxrealms::%player%} is not set:
+          send "&cThis player has already reached the maximum amount of realms they could make."
+         else:
+          set {_realms} to 0
+          loop {realm::*}:
+           if {realm::%arg-2%::owner} is player:
+            add 1 to {_realms}
+          if {_realms} is greater than {maxrealms::%player%}:
+           send "&cThis player has already reached the maximum amount of realms they could make."
+           stop
+          else:
+           if {realm::%arg-1%::users::%player%} is "op":
+            set {realm::%arg-1%::owner} to arg-2
+            send "&eYou have successfully transfered your realm ownership to %arg-2%&e."
+            stop
+           else:
+            send "&cYou must give this player op before transferring ownership to this player."
+        else:
+         send "&cThis player does not have access to the SMP realm."
+       else:
+        send "&cOnly the SMP realm owner can invite people to the realm."
+      else:
+       send "&cA SMP realm with this name does not exist."
+  else:
+   send "&cIncorrect usage. Please use ""/transfer <realm> <player>"" instead."
 
 command /kick [<text>] [<offline player>] [<text>]:
  trigger:
@@ -495,6 +549,50 @@ command /delete [<text>] [<text>]:
      send "&cA realm with this name does not exists."
      stop
 
+command /plan [<text>] [<text>]:
+ trigger:
+  if arg-1 is not set:
+   send "&cIncorrect usage. Please use ""/plan <realm name>"" instead."
+   stop
+  else:
+   if arg-2 is set:
+    send "&cIncorrect usage. The realm name should only contain one argument."
+    stop
+   else:
+    if {realm::%arg-1%} is set:
+     if {realm::%arg-1%::users::%player%} is set:
+      if {realm::%arg-1%::ranktime} is set:
+       set {_seconds} to {realm::%arg-1%::ranktime}
+       send "%{_seconds}%"
+       set {_day} to 0
+       set {_hour} to 0
+       set {_minutes} to 0
+       if {_seconds} - 86400 is more than -1:
+        loop 31 times:
+         if {_seconds} - 86400 is more than -1:
+          add 1 to {_day}
+          set {_seconds} to {_seconds} - 86400
+       if {_seconds} - 3600 is more than -1:
+        loop 23 times:
+         if {_seconds} - 3600 is more than -1:
+          add 1 to {_hour}
+          set {_seconds} to {_seconds} - 3600
+       if {_seconds} - 60 is more than -1:
+        loop 59 times:
+         if {_seconds} - 60 is more than -1:
+          add 1 to {_minutes}
+          set {_seconds} to {_seconds} - 60
+       set {_time} to colored "&e%{_day}%&e days, %{_hour}%&e hours, %{_minutes}%&e minutes and %{_seconds}%&e seconds."
+      else:
+       set {_time} to "Forever"
+      send "&eThis realm is currently on the plan ""%{realm::%arg-1%}%&e""."
+      send "&ePlan Time Left: %{_time}%"
+     else:
+      send "&cYou do not have access to this realm."
+    else:
+     send "&cA realm with this name does not exists."
+     stop
+
 command /join [<text>] [<text>]:
  trigger:
   if world of player is not "world":
@@ -697,6 +795,20 @@ on any movement:
   delete {nomove::%player%}
 
 on death:
+ set death message to ""
+ set {_worldname} to "%world of player%"
+ set {_worldcheck} to the first 2 characters of {_worldname}
+ if {_worldcheck} is "s-":
+  set {_world} to last length of "%world of player%" - 2 characters of "%world of player%"
+  if last 6 characters of "%{_world}%" is "-world":
+   set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
+  if last 7 characters of "%{_world}%" is "-nether":
+   set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
+  if last 4 characters of "%{_world}%" is "-end":
+   set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
+  loop all players:
+   if "%world of loop-player%" is "s-%{_world}%-world", "s-%{_world}%-nether" or "s-%{_world}%-end":
+    send "&f%player% died: %damage cause%." to loop-player
  force player to respawn
  set {_worldname} to "%world of player%"
  set {_worldcheck} to the first 2 characters of {_worldname}
