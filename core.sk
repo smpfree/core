@@ -471,9 +471,9 @@ command /giverealm [<offline player>] [<text>]:
 command /create [<text>] [<text>]:
  trigger:
   if {maxrealms::%player%} is not set:
-   #set {maxrealms::%player%} to 1
-   send "&cOnly alpha testers can make (a) SMP realm(s) the moment."
-   stop
+   set {maxrealms::%player%} to 1
+   #send "&cOnly alpha testers can make (a) SMP realm(s) the moment."
+   #stop
   if arg-1 is not set:
    send "&cIncorrect usage. Please use ""/create <realm name>"" instead."
    stop
