@@ -171,7 +171,7 @@ on command:
       cancel event
       send "&cWait %{cooldown::%player%}% seconds before running another command."
    else:
-    if world of player is "world": # cmd list 1 of 2
+    if world of player is "world": # cmd list 2 of 2
      if command is not "help", "hub", "list", "create", "delete", "join", "setclock", "unsetclock", "transfer", "plan" or "opme":
       cancel event
       send "&fUnknown command. Type ""/help"" for help."
