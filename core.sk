@@ -131,7 +131,7 @@ on command:
  if executor is player:
   if player is not op:
    if {runcmd::%player%} is set:
-    if world of player is "world":
+    if world of player is "world": # cmd list 1 of 2
      if command is not "help", "hub", "list", "create", "delete", "join", "setclock", "unsetclock", "transfer", "plan" or "opme":
       cancel event
       send "&fUnknown command. Type ""/help"" for help."
@@ -171,6 +171,16 @@ on command:
       cancel event
       send "&cWait %{cooldown::%player%}% seconds before running another command."
    else:
+    if world of player is "world": # cmd list 1 of 2
+     if command is not "help", "hub", "list", "create", "delete", "join", "setclock", "unsetclock", "transfer", "plan" or "opme":
+      cancel event
+      send "&fUnknown command. Type ""/help"" for help."
+      stop
+    else:
+     if command is not "help", "hub", "gamemode", "clear", "defaultgamemode", "gamerule", "difficulty", "tp", "weather", "time", "xp", "effect", "enchant", "kill" or "give":
+      cancel event
+      send "&fUnknown command. Type ""/help"" for help."
+      stop
     cancel event
     wait 1 tick
     if command is "create", "join", "delete" or "transfer":
@@ -785,8 +795,21 @@ on quit:
 
 on join:
  set join message to ""
- make player execute "hub"
- wait 1 second
+ execute console command "mv tp %player% world"
+ execute console command "mvconfirm"
+ wait 1 tick
+ loop all players:
+  if world of loop-player is "world":
+   send "&e%player%&e has joined the game" to loop-player
+ teleport player to location -960.5, 5, 408.5
+ clear player's inventory
+ remove fire from player
+ heal the player
+ feed the player
+ set xp of player to 0
+ execute console command "minecraft:effect clear %player%"
+ give player 1 diamond named "&eJoin Official SMP realm"
+ give player 1 clock named "&aQuick Join" with lore "&r&dYou can use the command ""/setclock"" to set this clock." and "&r&bRight click to join."
  send "&eWelcome to the server!"
  send "&bDiscord&f: &dhttps://discord.gg/SQUJs7r"
  stop
