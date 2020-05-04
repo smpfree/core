@@ -1,5 +1,3 @@
-
-
 command /setpro [<text>] [<text>]:
  trigger:
   if {proplan::%player%} is set:
