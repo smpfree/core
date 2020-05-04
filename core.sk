@@ -1,3 +1,5 @@
+
+
 command /setpro [<text>] [<text>]:
  trigger:
   if {proplan::%player%} is set:
@@ -132,7 +134,7 @@ on command:
   if player is not op:
    if {runcmd::%player%} is set:
     if world of player is "world": # cmd list 1 of 2
-     if command is not "help", "hub", "list", "create", "delete", "join", "setclock", "unsetclock", "transfer", "plan" or "opme":
+     if command is not "help", "hub", "list", "create", "delete", "join", "setclock", "unsetclock", "transfer", "plan", "opme", "setpro" or "buy":
       cancel event
       send "&fUnknown command. Type ""/help"" for help."
     else:
@@ -221,6 +223,8 @@ command /help [<text>]:
    send "&b/unsetclock &f- &eUnset the quick join clock at the hub."
    send "&b/transfer &f- &eTransfer your realm ownership."
    send "&b/plan &f- &eCheck what plan a realm has and how much more time the plan will last."
+   send "&b/setpro &f- &eSet a realm to a pro plan."
+   send "&b/buy &f- &eBuy an item from the store."
    send "&a----------------"
   else:
    set {_worldname} to "%world of player%"
@@ -523,8 +527,6 @@ command /create [<text>] [<text>]:
 
 command /delete [<text>] [<text>]:
  trigger:
-  send "&cThis experimental command has been disabled."
-  stop
   if arg-1 is not set:
    send "&cIncorrect usage. Please use ""/delete <realm name>"" instead."
    stop
@@ -535,6 +537,39 @@ command /delete [<text>] [<text>]:
    else:
     if {realm::%arg-1%} is set:
      if {realm::%arg-1%::owner} is player:
+      if {realm::%arg-1%::deletion} is set:
+       delete {realm::%arg-1%::deletion}
+       send "&eYou have removed your request to delete your realm."
+      else:
+       set {realm::%arg-1%::deletion} to true
+       send "&eYou have requested to delete your realm."
+      stop
+     else:
+      send "&cYou do not own this realm."
+      stop
+    else:
+     send "&cA realm with this name does not exists."
+     stop
+
+command /admindelete [<text>] [<text>]:
+ trigger:
+  if player is not op:
+   send "&cYou must be a server operator (not realm) in order to run this command."
+   stop
+  if arg-1 is not set:
+   send "&2In order to delete a realm, use ""/admindelete <realm name>""." to player
+   send "&2This command is not stable and you should check if the world files still remain in the file manager." to player
+   loop {realm::*}:
+    if {realm::%loop-index%::deletion} is set:
+     send "&e- &b%loop-index%" to player
+   stop
+  else:
+   if arg-2 is set:
+    send "&cIncorrect usage. The realm name should only contain one argument."
+    stop
+   else:
+    if {realm::%arg-1%} is set:
+     if {realm::%arg-1%::deletion} is set:
       send "&eDeleting realm..."
       loop all players:
        if world of loop-player is "s-%arg-1%-world", "s-%arg-1%-nether" or "s-%arg-1%-end":
@@ -559,7 +594,7 @@ command /delete [<text>] [<text>]:
       send "&eYour realm has been deleted."
       stop
      else:
-      send "&cYou do not own this realm."
+      send "&cThis realm has not requested for a realm deletion."
       stop
     else:
      send "&cA realm with this name does not exists."
@@ -759,11 +794,14 @@ every 5 seconds:
   if {_worlds::%loop-index%} is not true:
    if {realm::%loop-index%::loaded} is true:
     if {realm::%loop-index%} is "free":
-     execute console command "mv unload s-%loop-index%-world"
-     execute console command "mv unload s-%loop-index%-nether"
-     execute console command "mv unload s-%loop-index%-end"
      set {realm::%loop-index%::loaded} to false
- wait 1 second
+     execute console command "mv unload s-%loop-index%-world"
+     wait 1 tick
+     execute console command "mv unload s-%loop-index%-nether"
+     wait 1 tick
+     execute console command "mv unload s-%loop-index%-end"
+     wait 1 tick
+ wait 5 second
  if {stopping} is set:
   execute console command "minecraft:stop"
 
