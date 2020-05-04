@@ -129,10 +129,6 @@ command /unsetclock [<text>]:
 
 on command:
  if executor is player:
-  if {nomove::%player%} is set:
-   cancel event
-   send "&cYou must move at least once right after you join in order to run a command."
-   stop
   if player is not op:
    if {runcmd::%player%} is set:
     if world of player is "world":
@@ -176,8 +172,10 @@ on command:
       send "&cWait %{cooldown::%player%}% seconds before running another command."
    else:
     cancel event
-    set {cooldown::%player%} to 3
-    wait 1 second
+    wait 1 tick
+    if command is "create", "join", "delete" or "transfer":
+     set {cooldown::%player%} to 3
+     wait 1 second
     set {runcmd::%player%} to "%full command%"
     make player execute "%full command%"
     set {cooldown::%player%} to 2
@@ -719,8 +717,6 @@ command /hub [<text>]:
    execute console command "mv tp %player% world"
    execute console command "mvconfirm"
    wait 1 tick
-   giveinv("hub", player)
-   wait 1 tick
    loop all players:
     if world of loop-player is "world":
      send "&e%player%&e has joined the game" to loop-player
@@ -790,7 +786,6 @@ on quit:
 on join:
  set join message to ""
  make player execute "hub"
- set {nomove::%player%} to true
  wait 1 second
  send "&eWelcome to the server!"
  send "&bDiscord&f: &dhttps://discord.gg/SQUJs7r"
