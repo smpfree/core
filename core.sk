@@ -189,8 +189,8 @@ on command:
     if command is "create", "join", "delete" or "transfer":
      set {cooldown::%player%} to 3
      wait 1 second
-    set {runcmd::%player%} to "%full command%"
-    make player execute "%full command%"
+    set {runcmd::%player%} to "%{_run}%"
+    make player execute "%{_run}%"
     set {cooldown::%player%} to 2
     wait 1 second
     set {cooldown::%player%} to 1
