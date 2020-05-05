@@ -524,6 +524,7 @@ command /create [<text>] [<text>]:
       execute console command "mvnp link nether s-%arg-1%-end s-%arg-1%-nether"
       send "&eYour realm has been created."
       set {realm::%arg-1%::loaded} to true
+      broadcast "&eThe lagspike is over."
       stop
 
 command /delete [<text>] [<text>]:
