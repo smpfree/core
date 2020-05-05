@@ -182,6 +182,9 @@ on command:
       send "&fUnknown command. Type ""/help"" for help."
       stop
     cancel event
+    set {_run} to "%full command%"
+    if world of player is "world":
+     set {_run} to {_run} in lower case
     wait 1 tick
     if command is "create", "join", "delete" or "transfer":
      set {cooldown::%player%} to 3
@@ -547,8 +550,7 @@ command /delete [<text>] [<text>]:
       stop
     else:
      send "&cA realm with this name does not exists."
-     stop
-
+  
 command /admindelete [<text>] [<text>]:
  trigger:
   if player is not op:
@@ -658,6 +660,7 @@ command /join [<text>] [<text>]:
      make player execute "hub"
      stop
     if {realm::%arg-1%} is set:
+     deop the player
      set {_join} to false
      if {realm::%arg-1%::users::%player%} is set:
       set {_join} to true
