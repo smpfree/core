@@ -136,7 +136,7 @@ on command:
       cancel event
       send "&fUnknown command. Type ""/help"" for help."
     else:
-     if command is not "help", "hub", "gamemode", "clear", "defaultgamemode", "gamerule", "difficulty", "tp", "weather", "time", "xp", "effect", "enchant", "kill" or "give":
+     if command is not "help", "hub", "gamemode", "clear", "defaultgamemode", "gamerule", "difficulty", "tp", "weather", "time", "xp", "effect", "enchant", "kill", "summon" or "give":
       cancel event
       send "&fUnknown command. Type ""/help"" for help."
   else:
@@ -177,7 +177,7 @@ on command:
       send "&fUnknown command. Type ""/help"" for help."
       stop
     else:
-     if command is not "help", "hub", "gamemode", "clear", "defaultgamemode", "gamerule", "difficulty", "tp", "weather", "time", "xp", "effect", "enchant", "kill" or "give":
+     if command is not "help", "hub", "gamemode", "clear", "defaultgamemode", "gamerule", "difficulty", "tp", "weather", "time", "xp", "effect", "enchant", "kill", "summon" or "give":
       cancel event
       send "&fUnknown command. Type ""/help"" for help."
       stop
@@ -255,6 +255,7 @@ command /help [<text>]:
     send "&b/enchant &f- &eEnchant a item a player is holding."
     send "&b/kill &f- &eKill a player."
     send "&b/give &f- &eGive an item to a player."
+    send "&b/summon &f- &eSummon an entity."
    send "&a----------------"
 
 command /list [<text>]:
@@ -874,17 +875,7 @@ on death:
   loop all players:
    if "%world of loop-player%" is "s-%{_world}%-world", "s-%{_world}%-nether" or "s-%{_world}%-end":
     send "&f%player% died: %damage cause%." to loop-player
- force player to respawn
- set {_worldname} to "%world of player%"
- set {_worldcheck} to the first 2 characters of {_worldname}
- if {_worldcheck} is "s-":
-  set {_world} to last length of "%world of player%" - 2 characters of "%world of player%"
-  if last 6 characters of "%{_world}%" is "-world":
-   set {_world} to the first length of {_world} - 6 characters of "%{_world}%"
-  if last 7 characters of "%{_world}%" is "-nether":
-   set {_world} to the first length of {_world} - 7 characters of "%{_world}%"
-  if last 4 characters of "%{_world}%" is "-end":
-   set {_world} to the first length of {_world} - 4 characters of "%{_world}%"
+  force player to respawn
   wait 1 tick
   execute console command "mv tp %player% s-%{_world}%-world"
   execute console command "mvconfirm"
