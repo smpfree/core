@@ -1,5 +1,5 @@
 # FreeSMP
-This is the source code to the Skript that manages almost everything.
+This is the source code to the Skript that manages almost everything. VERY UNSTABLE!!!
 
 Tested on PaperSpigot 1.13.
 
